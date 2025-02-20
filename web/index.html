@@ -1,16 +1,48 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Telegram WebApp</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram WebApp</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <h1>Моё веб-приложение</h1>
-        <button onclick="sendDataToBot()">Отправить данные в бот</button>
+    <div class="app">
+        <div class="auth-container" id="authContainer">
+            <div class="auth-card">
+                <div class="profile-info" id="profileInfo" style="display: none;">
+                    <div class="avatar" id="userAvatar"></div>
+                    <h2 id="userName">Имя пользователя</h2>
+                    <p id="userStatus">Авторизован</p>
+                </div>
+                <div class="welcome-text" id="welcomeText">
+                    <h1>Добро пожаловать</h1>
+                    <p>Для использования приложения необходима авторизация</p>
+                </div>
+                <button class="auth-button" id="authButton">
+                    Авторизоваться через Telegram
+                </button>
+            </div>
+        </div>
+
+        <div class="main-content" id="mainContent" style="display: none;">
+            <!-- Здесь будет основной контент приложения -->
+            <div class="dashboard">
+                <h2>Панель управления</h2>
+                <div class="dashboard-cards">
+                    <div class="card">
+                        <h3>Карточка 1</h3>
+                        <p>Описание карточки</p>
+                    </div>
+                    <div class="card">
+                        <h3>Карточка 2</h3>
+                        <p>Описание карточки</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <script src="static/js/app.js"></script>
 </body>
