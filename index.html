@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram WebApp</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Обновите пути к файлам -->
+    <link rel="stylesheet" href="static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="loading">Загрузка...</div>
+
+    <div class="app" style="display: none;" id="app">
+        <div class="auth-container" id="authContainer">
+            <div class="auth-card">
+                <div class="profile-info" id="profileInfo" style="display: none;">
+                    <div class="avatar" id="userAvatar"></div>
+                    <h2 id="userName">Имя пользователя</h2>
+                    <p id="userStatus">Авторизован</p>
+                </div>
+                <div class="welcome-text" id="welcomeText">
+                    <h1>Добро пожаловать</h1>
+                    <p>Для использования приложения необходима авторизация</p>
+                </div>
+                <button class="auth-button" id="authButton">
+                    Авторизоваться через Telegram
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- Обновите путь к JavaScript файлу -->
+    <script src="static/js/app.js"></script>
+</body>
+</html> 
