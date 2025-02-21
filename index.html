@@ -82,19 +82,82 @@
             <div id="contentSections" class="content-sections">
                 <!-- Создание бота -->
                 <div id="create-bot" class="section fade-in" style="display: none;">
-                    <div class="card">
-                        <h2>Создание нового бота</h2>
-                        <form id="createBotForm" class="bot-form">
-                            <div class="input-group">
-                                <label for="botName">Имя бота</label>
-                                <input type="text" id="botName" placeholder="Например: MyAwesomeBot">
+                    <div class="bot-builder">
+                        <!-- Боковая панель с блоками -->
+                        <div class="builder-sidebar">
+                            <h3>Блоки</h3>
+                            <div class="blocks-category">
+                                <h4>Триггеры</h4>
+                                <div class="block-item" draggable="true" data-block-type="command">
+                                    <i class="fas fa-terminal"></i>
+                                    <span>Команда</span>
+                                </div>
+                                <div class="block-item" draggable="true" data-block-type="message">
+                                    <i class="fas fa-comment"></i>
+                                    <span>Сообщение</span>
+                                </div>
+                                <div class="block-item" draggable="true" data-block-type="button">
+                                    <i class="fas fa-square"></i>
+                                    <span>Кнопка</span>
+                                </div>
                             </div>
-                            <div class="input-group">
-                                <label for="botDescription">Описание</label>
-                                <textarea id="botDescription" rows="4" placeholder="Опишите функционал вашего бота"></textarea>
+                            <div class="blocks-category">
+                                <h4>Действия</h4>
+                                <div class="block-item" draggable="true" data-block-type="send-message">
+                                    <i class="fas fa-paper-plane"></i>
+                                    <span>Отправить сообщение</span>
+                                </div>
+                                <div class="block-item" draggable="true" data-block-type="send-photo">
+                                    <i class="fas fa-image"></i>
+                                    <span>Отправить фото</span>
+                                </div>
+                                <div class="block-item" draggable="true" data-block-type="keyboard">
+                                    <i class="fas fa-keyboard"></i>
+                                    <span>Клавиатура</span>
+                                </div>
                             </div>
-                            <button type="submit" class="btn btn-primary">Создать бота</button>
-                        </form>
+                            <div class="blocks-category">
+                                <h4>Логика</h4>
+                                <div class="block-item" draggable="true" data-block-type="if">
+                                    <i class="fas fa-code-branch"></i>
+                                    <span>Условие</span>
+                                </div>
+                                <div class="block-item" draggable="true" data-block-type="delay">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Задержка</span>
+                                </div>
+                                <div class="block-item" draggable="true" data-block-type="variable">
+                                    <i class="fas fa-database"></i>
+                                    <span>Переменная</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Основная область конструктора -->
+                        <div class="builder-main">
+                            <div class="builder-toolbar">
+                                <button class="btn btn-primary" onclick="saveBot()">
+                                    <i class="fas fa-save"></i> Сохранить
+                                </button>
+                                <button class="btn btn-outline" onclick="testBot()">
+                                    <i class="fas fa-play"></i> Тестировать
+                                </button>
+                                <button class="btn btn-outline" onclick="clearCanvas()">
+                                    <i class="fas fa-trash"></i> Очистить
+                                </button>
+                            </div>
+                            <div class="builder-canvas" id="builderCanvas">
+                                <!-- Здесь будут размещаться блоки -->
+                            </div>
+                        </div>
+
+                        <!-- Панель свойств -->
+                        <div class="builder-properties">
+                            <h3>Свойства</h3>
+                            <div id="blockProperties">
+                                <p class="no-selection-text">Выберите блок для настройки</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

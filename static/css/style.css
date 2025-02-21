@@ -543,4 +543,186 @@ body {
 
 .menu-item:hover i {
     animation: iconPulse 0.5s ease-in-out;
+}
+
+/* Стили для конструктора ботов */
+.bot-builder {
+    display: grid;
+    grid-template-columns: 250px 1fr 300px;
+    gap: 1rem;
+    height: calc(100vh - 100px);
+    margin-top: 1rem;
+}
+
+.builder-sidebar {
+    background: var(--surface);
+    border-radius: 1rem;
+    padding: 1rem;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+}
+
+.blocks-category {
+    margin-bottom: 1.5rem;
+}
+
+.blocks-category h4 {
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.block-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: var(--bg);
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+    cursor: move;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+}
+
+.block-item:hover {
+    border-color: var(--primary);
+    transform: translateX(5px);
+}
+
+.block-item i {
+    color: var(--primary);
+    font-size: 1rem;
+    margin: 0;
+}
+
+.block-item span {
+    color: var(--text);
+    font-size: 0.9rem;
+}
+
+.builder-main {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.builder-toolbar {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: var(--surface);
+    border-radius: 1rem;
+    border: 1px solid var(--border);
+}
+
+.builder-canvas {
+    flex: 1;
+    background: var(--surface);
+    border-radius: 1rem;
+    padding: 1rem;
+    overflow: auto;
+    border: 1px solid var(--border);
+    position: relative;
+}
+
+.builder-properties {
+    background: var(--surface);
+    border-radius: 1rem;
+    padding: 1rem;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+}
+
+/* Стили для блоков на холсте */
+.canvas-block {
+    position: absolute;
+    width: 200px;
+    padding: 1rem;
+    background: var(--bg);
+    border-radius: 0.5rem;
+    border: 2px solid var(--primary);
+    cursor: move;
+    user-select: none;
+}
+
+.canvas-block.selected {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent);
+}
+
+.block-connector {
+    width: 12px;
+    height: 12px;
+    background: var(--primary);
+    border-radius: 50%;
+    position: absolute;
+    cursor: pointer;
+}
+
+.block-connector.input {
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.block-connector.output {
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.connection-line {
+    position: absolute;
+    pointer-events: none;
+    stroke: var(--primary);
+    stroke-width: 2;
+}
+
+/* Стили для свойств блока */
+.property-group {
+    margin-bottom: 1rem;
+}
+
+.property-group label {
+    display: block;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.property-group input,
+.property-group select,
+.property-group textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+}
+
+.no-selection-text {
+    color: var(--text-secondary);
+    text-align: center;
+    margin-top: 2rem;
+    font-style: italic;
+}
+
+/* Анимации для блоков */
+@keyframes blockAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.canvas-block {
+    animation: blockAppear 0.3s ease-out;
 } 
