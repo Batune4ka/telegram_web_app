@@ -1,4 +1,4 @@
-from aiogram import Router, types
+from aiogram import Router, Bot, types
 from aiogram.filters import Command
 from database.bot_storage import BotStorage
 from services.bot_generator import BotGenerator
