@@ -19,12 +19,12 @@ async def main():
     # Инициализация хранилища ботов
     await bot_handlers.init_bot_storage()
 
-    # Регистрация роутеров
-    dp.include_router(bot_handlers.router)
-    
+    # Регистрация обработчиков бота
+    dp.include_router(bot_handlers.bot_router)
+
     # Настройка веб-сервера
     app = web.Application()
-    app.router.add_routes(bot_handlers.router)
+    app.router.add_routes(bot_handlers.web_routes)
 
     # Запуск веб-сервера
     runner = web.AppRunner(app)
