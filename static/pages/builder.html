@@ -87,11 +87,11 @@
             <!-- Основная область конструктора -->
             <div class="builder-main">
                 <div class="builder-toolbar">
-                    <button class="btn btn-primary" onclick="saveBot()">
-                        <i class="fas fa-save"></i> Сохранить
+                    <button class="btn btn-primary" onclick="showTokenModal()">
+                        <i class="fas fa-cog"></i> Настройки бота
                     </button>
-                    <button class="btn btn-outline" onclick="testBot()">
-                        <i class="fas fa-play"></i> Тестировать
+                    <button class="btn btn-outline" onclick="testBot()" id="testBotBtn" disabled>
+                        <i class="fas fa-play"></i> Запустить
                     </button>
                     <button class="btn btn-outline" onclick="clearCanvas()">
                         <i class="fas fa-trash"></i> Очистить
@@ -108,6 +108,34 @@
                 <div id="blockProperties">
                     <p class="no-selection-text">Выберите блок для настройки</p>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Добавим модальное окно для ввода токена -->
+    <div id="tokenModal" class="modal">
+        <div class="modal-content">
+            <h2>Настройка бота</h2>
+            <div class="input-group">
+                <label for="botName">Название бота</label>
+                <input type="text" id="botName" placeholder="Мой бот">
+            </div>
+            <div class="input-group">
+                <label for="botToken">Токен бота</label>
+                <div class="token-input-group">
+                    <input type="password" id="botToken" placeholder="Вставьте токен от @BotFather">
+                    <button class="btn btn-icon" onclick="toggleTokenVisibility()">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <small class="help-text">
+                    <i class="fas fa-info-circle"></i>
+                    Получить токен можно у <a href="https://t.me/BotFather" target="_blank">@BotFather</a>
+                </small>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-outline" onclick="closeTokenModal()">Отмена</button>
+                <button class="btn btn-primary" onclick="saveBotSettings()">Сохранить</button>
             </div>
         </div>
     </div>

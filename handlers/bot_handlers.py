@@ -27,14 +27,31 @@ async def test_bot(request: types.WebAppData):
     try:
         user_id = request.user.id
         schema = request.json['schema']
+        bot_token = request.json['token']
+        bot_name = request.json['name']
         
-        # Генерируем и запускаем тестового бота
-        bot_token = await bot_generator.create_test_bot(schema)
+        # Проверяем токен
+        try:
+            test_bot = Bot(token=bot_token)
+            bot_info = await test_bot.get_me()
+            await test_bot.close()
+        except Exception as e:
+            return types.Response(
+                status=400,
+                content_type='application/json',
+                text=json.dumps({'error': 'Неверный токен бота'})
+            )
+        
+        # Генерируем и запускаем бота
+        bot_token = await bot_generator.create_test_bot(schema, bot_token)
+        
+        # Сохраняем бота в базу
+        await bot_storage.save_bot(user_id, schema, bot_name)
         
         return types.Response(
             status=200,
             content_type='application/json',
-            text=json.dumps({'token': bot_token})
+            text=json.dumps({'success': True})
         )
     except Exception as e:
         print(f"Ошибка тестирования бота: {e}")

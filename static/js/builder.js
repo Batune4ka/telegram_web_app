@@ -9,6 +9,8 @@ class BotBuilder {
         this.isConnecting = false;
         this.startConnector = null;
         this.userId = null; // ID пользователя из Telegram
+        this.botToken = null;
+        this.botName = null;
         
         this.initializeEventListeners();
         this.loadUserData();
@@ -205,7 +207,11 @@ class BotBuilder {
     }
 
     async testBot() {
-        if (!this.userId) return;
+        if (!this.botToken) {
+            showNotification('Сначала настройте бота', 'warning');
+            showTokenModal();
+            return;
+        }
 
         try {
             const schema = this.saveSchema();
@@ -216,13 +222,14 @@ class BotBuilder {
                 },
                 body: JSON.stringify({
                     userId: this.userId,
+                    token: this.botToken,
+                    name: this.botName,
                     schema: schema
                 })
             });
 
             if (response.ok) {
-                const result = await response.json();
-                showNotification(`Бот запущен. Token: ${result.token}`, 'success');
+                showNotification('Бот успешно запущен!', 'success');
             } else {
                 throw new Error('Ошибка запуска бота');
             }
@@ -232,5 +239,85 @@ class BotBuilder {
         }
     }
 
+    setBotSettings(name, token) {
+        this.botName = name;
+        this.botToken = token;
+        
+        // Активируем кнопку тестирования
+        document.getElementById('testBotBtn').disabled = false;
+        
+        // Сохраняем настройки в localStorage
+        localStorage.setItem(`botSettings_${this.userId}`, JSON.stringify({
+            name: name,
+            token: token
+        }));
+    }
+
+    loadBotSettings() {
+        const settings = localStorage.getItem(`botSettings_${this.userId}`);
+        if (settings) {
+            const { name, token } = JSON.parse(settings);
+            this.botName = name;
+            this.botToken = token;
+            document.getElementById('testBotBtn').disabled = false;
+        }
+    }
+
     // ... остальные методы класса ...
-} 
+}
+
+// Функции для работы с модальным окном
+function showTokenModal() {
+    const modal = document.getElementById('tokenModal');
+    modal.style.display = 'block';
+    
+    // Загружаем сохраненные настройки
+    if (botBuilder.botName) {
+        document.getElementById('botName').value = botBuilder.botName;
+    }
+    if (botBuilder.botToken) {
+        document.getElementById('botToken').value = botBuilder.botToken;
+    }
+}
+
+function closeTokenModal() {
+    document.getElementById('tokenModal').style.display = 'none';
+}
+
+function toggleTokenVisibility() {
+    const tokenInput = document.getElementById('botToken');
+    const eyeIcon = document.querySelector('.btn-icon i');
+    
+    if (tokenInput.type === 'password') {
+        tokenInput.type = 'text';
+        eyeIcon.className = 'fas fa-eye-slash';
+    } else {
+        tokenInput.type = 'password';
+        eyeIcon.className = 'fas fa-eye';
+    }
+}
+
+function saveBotSettings() {
+    const name = document.getElementById('botName').value.trim();
+    const token = document.getElementById('botToken').value.trim();
+    
+    if (!name || !token) {
+        showNotification('Заполните все поля', 'warning');
+        return;
+    }
+    
+    if (!token.match(/^\d+:[A-Za-z0-9_-]+$/)) {
+        showNotification('Неверный формат токена', 'error');
+        return;
+    }
+    
+    botBuilder.setBotSettings(name, token);
+    closeTokenModal();
+    showNotification('Настройки сохранены', 'success');
+}
+
+// При загрузке страницы
+document.addEventListener('DOMContentLoaded', () => {
+    botBuilder = new BotBuilder();
+    botBuilder.loadBotSettings();
+}); 
