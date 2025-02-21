@@ -80,4 +80,4 @@ async def get_user_bots(request: web.Request):
 
 async def init_bot_storage():
     global bot_storage
-    bot_storage = await BotStorage() 
+    bot_storage = await BotStorage.create() 
