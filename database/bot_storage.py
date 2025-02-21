@@ -3,9 +3,9 @@ import json
 from datetime import datetime
 
 class BotStorage:
-    def __init__(self, db_path="database/bots.db"):
+    async def __init__(self, db_path="database/bots.db"):
         self.db_path = db_path
-        self._init_db()
+        await self._init_db()
 
     async def _init_db(self):
         """Инициализация базы данных"""

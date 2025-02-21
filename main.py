@@ -12,9 +12,13 @@ load_dotenv()
 async def main():
     logging.basicConfig(level=logging.INFO)
     
+    # Инициализация бота
     bot = Bot(token=os.getenv('BOT_TOKEN'))
     dp = Dispatcher()
-    
+
+    # Инициализация хранилища ботов
+    await bot_handlers.init_bot_storage()
+
     # Регистрация роутеров
     dp.include_router(bot_handlers.router)
     
