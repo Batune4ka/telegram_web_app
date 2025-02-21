@@ -19,69 +19,56 @@ class BotBuilder {
 
     initializeEventListeners() {
         // Обработчики для блоков в сайдбаре
-        const blockItems = document.querySelectorAll('.block-item');
-        blockItems.forEach(item => {
-            item.addEventListener('click', () => {
-                const blockType = item.getAttribute('data-type');
-                this.addBlockToCanvas(blockType);
-            });
-
-            // Добавляем поддержку touch для мобильных устройств
-            item.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                const blockType = item.getAttribute('data-type');
-                this.addBlockToCanvas(blockType);
+        document.querySelectorAll('.block-item').forEach(block => {
+            block.addEventListener('click', (e) => {
+                const blockType = block.getAttribute('data-type');
+                const rect = this.canvas.getBoundingClientRect();
+                // Размещаем блок в центре холста
+                const x = rect.width / 2 - 100; // 100 - половина ширины блока
+                const y = rect.height / 2 - 50; // 50 - половина высоты блока
+                this.createBlock(blockType, x, y);
             });
         });
 
-        // Обработчик для выбора блока на холсте
-        this.canvas.addEventListener('click', (e) => {
+        // Обработчик для перемещения блоков на холсте
+        this.canvas.addEventListener('mousedown', (e) => {
             const block = e.target.closest('.canvas-block');
             if (block) {
-                this.selectBlock(block);
-            } else {
-                this.deselectBlock();
+                this.startDragging(block, e);
             }
         });
 
-        // Обработчики для холста
-        this.canvas.addEventListener('dragover', (e) => {
-            e.preventDefault();
-        });
-
-        this.canvas.addEventListener('drop', (e) => {
-            e.preventDefault();
-            const blockType = e.dataTransfer.getData('blockType');
-            if (blockType) {
-                const rect = this.canvas.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                this.createBlock(blockType, x, y);
-            }
-        });
-
-        // Обработка перемещения существующих блоков
         document.addEventListener('mousemove', (e) => {
             if (this.draggedBlock) {
-                const rect = this.canvas.getBoundingClientRect();
-                const x = e.clientX - rect.left - this.offset.x;
-                const y = e.clientY - rect.top - this.offset.y;
-                
-                // Ограничиваем перемещение пределами холста
-                const maxX = rect.width - this.draggedBlock.offsetWidth;
-                const maxY = rect.height - this.draggedBlock.offsetHeight;
-                
-                this.draggedBlock.style.left = `${Math.max(0, Math.min(x, maxX))}px`;
-                this.draggedBlock.style.top = `${Math.max(0, Math.min(y, maxY))}px`;
-                
-                // Обновляем соединения
-                this.updateConnections();
+                this.moveBlock(e);
             }
         });
 
         document.addEventListener('mouseup', () => {
             if (this.draggedBlock) {
-                this.draggedBlock = null;
+                this.stopDragging();
+            }
+        });
+
+        // Обработчики для мобильных устройств
+        this.canvas.addEventListener('touchstart', (e) => {
+            const block = e.target.closest('.canvas-block');
+            if (block) {
+                e.preventDefault();
+                this.startDragging(block, e.touches[0]);
+            }
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            if (this.draggedBlock) {
+                e.preventDefault();
+                this.moveBlock(e.touches[0]);
+            }
+        });
+
+        document.addEventListener('touchend', () => {
+            if (this.draggedBlock) {
+                this.stopDragging();
             }
         });
     }
@@ -108,122 +95,78 @@ class BotBuilder {
         }
     }
 
-    addBlockToCanvas(type) {
-        const blockId = `block_${Date.now()}`;
+    createBlock(type, x, y) {
         const block = document.createElement('div');
-        block.id = blockId;
         block.className = 'canvas-block';
         block.setAttribute('data-type', type);
-
-        // Добавляем содержимое блока
-        block.innerHTML = `
-            <div class="block-header">
-                <i class="fas ${this.getBlockIcon(type)}"></i>
-                <span>${this.getBlockTitle(type)}</span>
-            </div>
-            <div class="block-content"></div>
-            <div class="block-connectors">
-                <div class="connector input"></div>
-                <div class="connector output"></div>
-            </div>
-        `;
-
-        // Делаем блок перетаскиваемым
-        block.draggable = true;
-        this.addDragListeners(block);
-
-        // Добавляем блок на холст
-        this.canvas.appendChild(block);
         
-        // Позиционируем блок в центре видимой области холста
-        const canvasRect = this.canvas.getBoundingClientRect();
-        const blockRect = block.getBoundingClientRect();
-        const scrollX = this.canvas.scrollLeft;
-        const scrollY = this.canvas.scrollTop;
-
-        const x = (canvasRect.width - blockRect.width) / 2 + scrollX;
-        const y = (canvasRect.height - blockRect.height) / 2 + scrollY;
-
+        // Добавляем содержимое блока в зависимости от типа
+        const content = this.getBlockContent(type);
+        block.innerHTML = content;
+        
+        // Устанавливаем позицию
         block.style.left = `${x}px`;
         block.style.top = `${y}px`;
-
-        // Сохраняем данные блока
-        this.blocks.set(blockId, {
-            type: type,
-            properties: this.getDefaultProperties(type)
-        });
-
-        // Выбираем новый блок
-        this.selectBlock(block);
-
+        
+        this.canvas.appendChild(block);
         return block;
     }
 
-    addDragListeners(block) {
-        let isDragging = false;
-        let currentX;
-        let currentY;
-        let initialX;
-        let initialY;
-        let xOffset = 0;
-        let yOffset = 0;
+    getBlockContent(type) {
+        const icons = {
+            'command': '⌘',
+            'message': '💬',
+            'button': '🔲',
+            'send-message': '📤',
+            'send-photo': '📷',
+            'keyboard': '⌨️',
+            'condition': '⚡',
+        };
 
-        block.addEventListener('mousedown', (e) => {
-            initialX = e.clientX - xOffset;
-            initialY = e.clientY - yOffset;
+        const titles = {
+            'command': 'Команда',
+            'message': 'Сообщение',
+            'button': 'Кнопка',
+            'send-message': 'Отправить сообщение',
+            'send-photo': 'Отправить фото',
+            'keyboard': 'Клавиатура',
+            'condition': 'Условие',
+        };
 
-            if (e.target === block) {
-                isDragging = true;
-            }
-        });
+        return `
+            <div class="block-header">
+                <span class="block-icon">${icons[type] || '📦'}</span>
+                <span class="block-title">${titles[type] || 'Блок'}</span>
+            </div>
+        `;
+    }
 
-        document.addEventListener('mousemove', (e) => {
-            if (isDragging) {
-                e.preventDefault();
-                currentX = e.clientX - initialX;
-                currentY = e.clientY - initialY;
+    startDragging(block, event) {
+        this.draggedBlock = block;
+        const rect = block.getBoundingClientRect();
+        this.dragOffset = {
+            x: event.clientX - rect.left,
+            y: event.clientY - rect.top
+        };
+        block.classList.add('dragging');
+    }
 
-                xOffset = currentX;
-                yOffset = currentY;
+    moveBlock(event) {
+        const rect = this.canvas.getBoundingClientRect();
+        let x = event.clientX - rect.left - this.dragOffset.x;
+        let y = event.clientY - rect.top - this.dragOffset.y;
 
-                block.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
-            }
-        });
+        // Ограничиваем движение пределами холста
+        x = Math.max(0, Math.min(x, rect.width - this.draggedBlock.offsetWidth));
+        y = Math.max(0, Math.min(y, rect.height - this.draggedBlock.offsetHeight));
 
-        document.addEventListener('mouseup', () => {
-            initialX = currentX;
-            initialY = currentY;
-            isDragging = false;
-        });
+        this.draggedBlock.style.left = `${x}px`;
+        this.draggedBlock.style.top = `${y}px`;
+    }
 
-        // Добавляем поддержку touch событий
-        block.addEventListener('touchstart', (e) => {
-            initialX = e.touches[0].clientX - xOffset;
-            initialY = e.touches[0].clientY - yOffset;
-
-            if (e.target === block) {
-                isDragging = true;
-            }
-        });
-
-        document.addEventListener('touchmove', (e) => {
-            if (isDragging) {
-                e.preventDefault();
-                currentX = e.touches[0].clientX - initialX;
-                currentY = e.touches[0].clientY - initialY;
-
-                xOffset = currentX;
-                yOffset = currentY;
-
-                block.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
-            }
-        });
-
-        document.addEventListener('touchend', () => {
-            initialX = currentX;
-            initialY = currentY;
-            isDragging = false;
-        });
+    stopDragging() {
+        this.draggedBlock.classList.remove('dragging');
+        this.draggedBlock = null;
     }
 
     selectBlock(block) {
@@ -469,29 +412,48 @@ const style = document.createElement('style');
 style.textContent = `
     .canvas-block {
         position: absolute;
-        background: var(--surface);
-        border: 2px solid var(--border);
+        background: #2c2c2c;
+        border: 2px solid #3d3d3d;
         border-radius: 8px;
-        padding: 1rem;
+        padding: 15px;
         min-width: 200px;
         cursor: move;
         user-select: none;
+        color: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
-    .canvas-block.selected {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 2px var(--primary-light);
+    .canvas-block.dragging {
+        opacity: 0.8;
+        box-shadow: 0 5px 10px rgba(0,0,0,0.3);
     }
 
     .block-header {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 0.5rem;
+        gap: 10px;
     }
 
-    .block-header i {
-        color: var(--primary);
+    .block-icon {
+        font-size: 20px;
+    }
+
+    .block-title {
+        font-size: 16px;
+        font-weight: 500;
+    }
+
+    #builderCanvas {
+        position: relative;
+        min-height: 600px;
+        background: #1e1e1e;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .canvas-block.selected {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px var(--primary-light);
     }
 
     .block-connectors {
