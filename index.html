@@ -8,11 +8,14 @@
     <!-- Добавляем префикс ./ к путям -->
     <link rel="stylesheet" href="./static/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Добавляем иконки -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div id="loading">Загрузка...</div>
 
     <div class="app" style="display: none;" id="app">
+        <!-- Секция авторизации -->
         <div class="auth-container" id="authContainer">
             <div class="auth-card">
                 <div class="profile-info" id="profileInfo" style="display: none;">
@@ -27,6 +30,78 @@
                 <button class="auth-button" id="authButton">
                     Авторизоваться через Telegram
                 </button>
+            </div>
+        </div>
+
+        <!-- Главное меню -->
+        <div class="main-content" id="mainContent" style="display: none;">
+            <div class="dashboard">
+                <div class="menu-header">
+                    <div class="user-info">
+                        <div class="user-avatar" id="menuUserAvatar"></div>
+                        <div class="user-details">
+                            <h2 id="menuUserName">Имя пользователя</h2>
+                            <p id="menuUserStatus">@username</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="menu-grid">
+                    <div class="menu-item" onclick="showSection('create-bot')">
+                        <i class="fas fa-robot"></i>
+                        <h3>Создать бота</h3>
+                        <p>Создайте своего Telegram бота</p>
+                    </div>
+
+                    <div class="menu-item" onclick="showSection('profile')">
+                        <i class="fas fa-user"></i>
+                        <h3>Мой профиль</h3>
+                        <p>Управление аккаунтом</p>
+                    </div>
+
+                    <div class="menu-item" onclick="showSection('support')">
+                        <i class="fas fa-headset"></i>
+                        <h3>Поддержка</h3>
+                        <p>Помощь и обратная связь</p>
+                    </div>
+
+                    <div class="menu-item" onclick="showSection('updates')">
+                        <i class="fas fa-bell"></i>
+                        <h3>Обновления</h3>
+                        <p>Что нового?</p>
+                    </div>
+                </div>
+
+                <!-- Секции контента -->
+                <div id="content-sections" class="content-sections">
+                    <div id="create-bot" class="content-section" style="display: none;">
+                        <h2>Создание бота</h2>
+                        <div class="section-content">
+                            <p>Здесь будет форма создания бота</p>
+                        </div>
+                    </div>
+
+                    <div id="profile" class="content-section" style="display: none;">
+                        <h2>Мой профиль</h2>
+                        <div class="section-content">
+                            <p>Информация о профиле</p>
+                        </div>
+                    </div>
+
+                    <div id="support" class="content-section" style="display: none;">
+                        <h2>Поддержка</h2>
+                        <div class="section-content">
+                            <p>Связь с поддержкой</p>
+                        </div>
+                    </div>
+
+                    <div id="updates" class="content-section" style="display: none;">
+                        <h2>Обновления</h2>
+                        <div class="section-content">
+                            <p>Список обновлений</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
