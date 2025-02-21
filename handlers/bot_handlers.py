@@ -85,8 +85,8 @@ async def get_user_bots(request: web.Request):
 # Команды бота
 @bot_router.message(Command("start"))
 async def cmd_start(message: types.Message):
-    # Получаем URL из переменной окружения
-    webapp_url = os.getenv('BOT_WEBAPP_URL')
+    # Используем URL напрямую
+    webapp_url = "https://t.me/genemiai_bot/test_web_app"
     
     # Создаем кнопку для открытия веб-приложения
     keyboard = types.InlineKeyboardMarkup(
