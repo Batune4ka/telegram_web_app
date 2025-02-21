@@ -1,11 +1,25 @@
 from aiogram import Router, types
 from aiogram.filters import Command
+from aiogram.types import KeyboardButton, ReplyKeyboardMarkup, WebAppInfo
 from keyboards.web_app_keyboards import get_webapp_keyboard
 from database.database import Database
 import json
+from config.config import config
 
 router = Router()
 db = Database('database/bot.db')
+
+def get_webapp_keyboard():
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(
+                text="Открыть приложение", 
+                web_app=WebAppInfo(url=config.WEB_APP_URL)
+            )]
+        ],
+        resize_keyboard=True
+    )
+    return keyboard
 
 @router.message(Command("start"))
 async def cmd_start(message: types.Message):
