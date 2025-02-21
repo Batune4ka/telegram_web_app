@@ -81,7 +81,22 @@ async def get_user_bots(request: web.Request):
 # Команды бота
 @bot_router.message(Command("start"))
 async def cmd_start(message: types.Message):
-    await message.answer("Привет! Я бот для создания других ботов.")
+    # Создаем кнопку для открытия веб-приложения
+    keyboard = types.InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                types.InlineKeyboardButton(
+                    text="Открыть конструктор", 
+                    web_app=types.WebAppInfo(url="https://t.me/genemiai_bot/test_web_app")
+                )
+            ]
+        ]
+    )
+    
+    await message.answer(
+        "Привет! Я бот для создания других ботов. Нажмите кнопку ниже, чтобы открыть конструктор.",
+        reply_markup=keyboard
+    )
 
 async def init_bot_storage():
     global bot_storage
