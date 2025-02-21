@@ -19,12 +19,29 @@ class BotBuilder {
 
     initializeEventListeners() {
         // Обработчики для блоков в сайдбаре
-        const sidebarBlocks = document.querySelectorAll('.block-item');
-        sidebarBlocks.forEach(block => {
-            block.draggable = true;
-            block.addEventListener('dragstart', (e) => {
-                e.dataTransfer.setData('blockType', block.dataset.blockType);
+        const blockItems = document.querySelectorAll('.block-item');
+        blockItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const blockType = item.getAttribute('data-type');
+                this.addBlockToCanvas(blockType);
             });
+
+            // Добавляем поддержку touch для мобильных устройств
+            item.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                const blockType = item.getAttribute('data-type');
+                this.addBlockToCanvas(blockType);
+            });
+        });
+
+        // Обработчик для выбора блока на холсте
+        this.canvas.addEventListener('click', (e) => {
+            const block = e.target.closest('.canvas-block');
+            if (block) {
+                this.selectBlock(block);
+            } else {
+                this.deselectBlock();
+            }
         });
 
         // Обработчики для холста
@@ -91,127 +108,122 @@ class BotBuilder {
         }
     }
 
-    createBlock(type, x, y) {
+    addBlockToCanvas(type) {
+        const blockId = `block_${Date.now()}`;
         const block = document.createElement('div');
+        block.id = blockId;
         block.className = 'canvas-block';
+        block.setAttribute('data-type', type);
+
+        // Добавляем содержимое блока
+        block.innerHTML = `
+            <div class="block-header">
+                <i class="fas ${this.getBlockIcon(type)}"></i>
+                <span>${this.getBlockTitle(type)}</span>
+            </div>
+            <div class="block-content"></div>
+            <div class="block-connectors">
+                <div class="connector input"></div>
+                <div class="connector output"></div>
+            </div>
+        `;
+
+        // Делаем блок перетаскиваемым
         block.draggable = true;
-        block.dataset.blockType = type;
+        this.addDragListeners(block);
+
+        // Добавляем блок на холст
+        this.canvas.appendChild(block);
+        
+        // Позиционируем блок в центре видимой области холста
+        const canvasRect = this.canvas.getBoundingClientRect();
+        const blockRect = block.getBoundingClientRect();
+        const scrollX = this.canvas.scrollLeft;
+        const scrollY = this.canvas.scrollTop;
+
+        const x = (canvasRect.width - blockRect.width) / 2 + scrollX;
+        const y = (canvasRect.height - blockRect.height) / 2 + scrollY;
+
         block.style.left = `${x}px`;
         block.style.top = `${y}px`;
 
-        // Добавляем содержимое блока
-        const content = this.createBlockContent(type);
-        block.appendChild(content);
-
-        // Добавляем обработчики для перетаскивания
-        block.addEventListener('dragstart', (e) => {
-            this.draggedBlock = block;
-            const rect = block.getBoundingClientRect();
-            this.offset.x = e.clientX - rect.left;
-            this.offset.y = e.clientY - rect.top;
-        });
-
-        block.addEventListener('click', () => {
-            this.selectBlock(block);
-        });
-
-        this.canvas.appendChild(block);
-        this.blocks.set(block.id, {
+        // Сохраняем данные блока
+        this.blocks.set(blockId, {
             type: type,
             properties: this.getDefaultProperties(type)
         });
 
+        // Выбираем новый блок
+        this.selectBlock(block);
+
         return block;
     }
 
-    createBlockContent(type) {
-        const content = document.createElement('div');
-        content.className = 'block-content';
-        
-        const icon = document.createElement('i');
-        const title = document.createElement('span');
-        
-        switch(type) {
-            case 'command':
-                icon.className = 'fas fa-terminal';
-                title.textContent = 'Команда';
-                break;
-            case 'message':
-                icon.className = 'fas fa-comment';
-                title.textContent = 'Сообщение';
-                break;
-            case 'button':
-                icon.className = 'fas fa-square';
-                title.textContent = 'Кнопка';
-                break;
-            case 'send-message':
-                icon.className = 'fas fa-paper-plane';
-                title.textContent = 'Отправить';
-                break;
-            case 'if':
-                icon.className = 'fas fa-code-branch';
-                title.textContent = 'Условие';
-                break;
-            case 'delay':
-                icon.className = 'fas fa-clock';
-                title.textContent = 'Задержка';
-                break;
-            case 'variable':
-                icon.className = 'fas fa-database';
-                title.textContent = 'Переменная';
-                break;
-            default:
-                icon.className = 'fas fa-cube';
-                title.textContent = 'Блок';
-        }
-        
-        content.appendChild(icon);
-        content.appendChild(title);
-        return content;
-    }
+    addDragListeners(block) {
+        let isDragging = false;
+        let currentX;
+        let currentY;
+        let initialX;
+        let initialY;
+        let xOffset = 0;
+        let yOffset = 0;
 
-    getDefaultProperties(type) {
-        switch(type) {
-            case 'command':
-                return {
-                    command: '',
-                    description: '',
-                    response: ''
-                };
-            case 'message':
-                return {
-                    pattern: '',
-                    response: ''
-                };
-            case 'button':
-                return {
-                    text: '',
-                    callback_data: '',
-                    url: ''
-                };
-            case 'send-message':
-                return {
-                    pattern: '',
-                    response: ''
-                };
-            case 'if':
-                return {
-                    condition: '',
-                    true_branch: '',
-                    false_branch: ''
-                };
-            case 'delay':
-                return {
-                    duration: ''
-                };
-            case 'variable':
-                return {
-                    name: '',
-                    value: ''
-                };
-            default:
-                return {};
-        }
+        block.addEventListener('mousedown', (e) => {
+            initialX = e.clientX - xOffset;
+            initialY = e.clientY - yOffset;
+
+            if (e.target === block) {
+                isDragging = true;
+            }
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                e.preventDefault();
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+
+                xOffset = currentX;
+                yOffset = currentY;
+
+                block.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            initialX = currentX;
+            initialY = currentY;
+            isDragging = false;
+        });
+
+        // Добавляем поддержку touch событий
+        block.addEventListener('touchstart', (e) => {
+            initialX = e.touches[0].clientX - xOffset;
+            initialY = e.touches[0].clientY - yOffset;
+
+            if (e.target === block) {
+                isDragging = true;
+            }
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            if (isDragging) {
+                e.preventDefault();
+                currentX = e.touches[0].clientX - initialX;
+                currentY = e.touches[0].clientY - initialY;
+
+                xOffset = currentX;
+                yOffset = currentY;
+
+                block.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+            }
+        });
+
+        document.addEventListener('touchend', () => {
+            initialX = currentX;
+            initialY = currentY;
+            isDragging = false;
+        });
     }
 
     selectBlock(block) {
@@ -220,49 +232,87 @@ class BotBuilder {
         }
         this.selectedBlock = block;
         block.classList.add('selected');
-        this.showBlockProperties(block);
+        this.showProperties(block);
     }
 
-    showBlockProperties(block) {
-        const blockData = this.blocks.get(block.id);
-        const properties = blockData.properties;
-        
-        this.propertiesPanel.innerHTML = '';
-        const title = document.createElement('h3');
-        title.textContent = `Настройки ${this.getBlockTitle(blockData.type)}`;
-        this.propertiesPanel.appendChild(title);
-
-        for (const [key, value] of Object.entries(properties)) {
-            const group = document.createElement('div');
-            group.className = 'property-group';
-
-            const label = document.createElement('label');
-            label.textContent = this.getPropertyLabel(key);
-
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.value = value;
-            input.addEventListener('change', (e) => {
-                properties[key] = e.target.value;
-            });
-
-            group.appendChild(label);
-            group.appendChild(input);
-            this.propertiesPanel.appendChild(group);
+    deselectBlock() {
+        if (this.selectedBlock) {
+            this.selectedBlock.classList.remove('selected');
+            this.selectedBlock = null;
+            this.propertiesPanel.innerHTML = '<h3>Свойства</h3><p>Выберите блок для настройки</p>';
         }
+    }
+
+    showProperties(block) {
+        const blockData = this.blocks.get(block.id);
+        if (!blockData) return;
+
+        this.propertiesPanel.innerHTML = `
+            <h3>Свойства: ${this.getBlockTitle(blockData.type)}</h3>
+            <div class="properties-form"></div>
+        `;
+
+        const form = this.propertiesPanel.querySelector('.properties-form');
+        Object.entries(blockData.properties).forEach(([key, value]) => {
+            const field = this.createPropertyField(key, value, (newValue) => {
+                blockData.properties[key] = newValue;
+            });
+            form.appendChild(field);
+        });
+    }
+
+    createPropertyField(key, value, onChange) {
+        const field = document.createElement('div');
+        field.className = 'property-field';
+
+        const label = document.createElement('label');
+        label.textContent = this.getPropertyLabel(key);
+        field.appendChild(label);
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = value;
+        input.addEventListener('change', (e) => onChange(e.target.value));
+        field.appendChild(input);
+
+        return field;
+    }
+
+    getBlockIcon(type) {
+        const icons = {
+            'command': 'fa-terminal',
+            'message': 'fa-comment',
+            'button': 'fa-square'
+        };
+        return icons[type] || 'fa-cube';
     }
 
     getBlockTitle(type) {
         const titles = {
-            'command': 'команды',
-            'message': 'сообщения',
-            'button': 'кнопки',
-            'send-message': 'отправки',
-            'if': 'условия',
-            'delay': 'задержки',
-            'variable': 'переменной'
+            'command': 'Команда',
+            'message': 'Сообщение',
+            'button': 'Кнопка'
         };
-        return titles[type] || 'блока';
+        return titles[type] || 'Блок';
+    }
+
+    getDefaultProperties(type) {
+        const properties = {
+            'command': {
+                command: '',
+                description: '',
+                response: ''
+            },
+            'message': {
+                text: '',
+                parse_mode: 'HTML'
+            },
+            'button': {
+                text: '',
+                callback_data: ''
+            }
+        };
+        return properties[type] || {};
     }
 
     getPropertyLabel(key) {
@@ -270,16 +320,9 @@ class BotBuilder {
             'command': 'Команда',
             'description': 'Описание',
             'response': 'Ответ',
-            'pattern': 'Шаблон',
             'text': 'Текст',
-            'callback_data': 'Callback data',
-            'url': 'URL',
-            'condition': 'Условие',
-            'true_branch': 'True branch',
-            'false_branch': 'False branch',
-            'duration': 'Duration',
-            'name': 'Name',
-            'value': 'Value'
+            'parse_mode': 'Режим разметки',
+            'callback_data': 'Callback data'
         };
         return labels[key] || key;
     }
@@ -426,41 +469,80 @@ const style = document.createElement('style');
 style.textContent = `
     .canvas-block {
         position: absolute;
-        background: white;
-        border: 2px solid #ddd;
+        background: var(--surface);
+        border: 2px solid var(--border);
         border-radius: 8px;
-        padding: 15px;
-        min-width: 150px;
+        padding: 1rem;
+        min-width: 200px;
         cursor: move;
         user-select: none;
     }
 
     .canvas-block.selected {
-        border-color: #2196F3;
-        box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px var(--primary-light);
     }
 
-    .block-content {
+    .block-header {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
     }
 
-    .property-group {
-        margin-bottom: 15px;
+    .block-header i {
+        color: var(--primary);
     }
 
-    .property-group label {
+    .block-connectors {
+        position: relative;
+        height: 20px;
+    }
+
+    .connector {
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        background: var(--surface);
+        border: 2px solid var(--primary);
+        border-radius: 50%;
+        cursor: pointer;
+    }
+
+    .connector.input {
+        top: -6px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .connector.output {
+        bottom: -6px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .property-field {
+        margin-bottom: 1rem;
+    }
+
+    .property-field label {
         display: block;
-        margin-bottom: 5px;
+        margin-bottom: 0.5rem;
         color: var(--text-secondary);
     }
 
-    .property-group input {
+    .property-field input {
         width: 100%;
-        padding: 8px;
+        padding: 0.5rem;
         border: 1px solid var(--border);
         border-radius: 4px;
+        background: var(--surface);
+        color: var(--text-primary);
+    }
+
+    .property-field input:focus {
+        border-color: var(--primary);
+        outline: none;
     }
 `;
 
