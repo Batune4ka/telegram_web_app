@@ -768,4 +768,78 @@ body {
 .back-button:hover {
     transform: scale(1.1);
     background: var(--secondary);
+}
+
+/* Добавляем стили для навигации */
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.back-link {
+    color: var(--primary);
+    font-size: 1.2rem;
+    text-decoration: none;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.back-link:hover {
+    background: var(--accent);
+    color: white;
+    transform: translateX(-5px);
+}
+
+/* Обновляем стили для пунктов меню */
+.menu-item {
+    text-decoration: none;
+    display: block;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 25px;
+    border-radius: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.menu-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Обновляем стили для навигации */
+.nav-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .nav-bar {
+        padding: 1rem;
+    }
+
+    .nav-left {
+        gap: 0.5rem;
+    }
+
+    .nav-logo {
+        font-size: 1.2rem;
+    }
 } 

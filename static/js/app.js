@@ -45,32 +45,17 @@ function getElement(id) {
 
 // Показать секцию контента
 function showSection(sectionId) {
-    // Скрываем все секции
     const sections = document.querySelectorAll('.section');
     sections.forEach(section => {
         section.style.display = 'none';
     });
 
-    // Убираем активный класс со всех пунктов меню
-    const menuItems = document.querySelectorAll('.menu-item');
-    menuItems.forEach(item => {
-        item.classList.remove('active');
-    });
-
-    // Показываем выбранную секцию
-    const selectedSection = getElement(sectionId);
+    const selectedSection = document.getElementById(sectionId);
     if (selectedSection) {
         selectedSection.style.display = 'block';
-        // Добавляем анимацию
         selectedSection.classList.remove('fade-in');
-        void selectedSection.offsetWidth; // Форсируем перерисовку
+        void selectedSection.offsetWidth;
         selectedSection.classList.add('fade-in');
-    }
-
-    // Добавляем активный класс к выбранному пункту меню
-    const selectedMenuItem = document.querySelector(`.menu-item[onclick="showSection('${sectionId}')"]`);
-    if (selectedMenuItem) {
-        selectedMenuItem.classList.add('active');
     }
 }
 
