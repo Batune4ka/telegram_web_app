@@ -4,11 +4,34 @@ let tg = window.Telegram.WebApp;
 // Расширяем окно на весь экран
 tg.expand();
 
-// Устанавливаем основной цвет
-tg.MainButton.setParams({
-    text: 'Закрыть приложение',
-    color: '#2481db'
+// Управление темой
+function setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+    updateThemeIcon();
+}
+
+function updateThemeIcon() {
+    const themeIcon = document.querySelector('#themeToggle i');
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    
+    if (currentTheme === 'dark') {
+        themeIcon.className = 'fas fa-sun';
+    } else {
+        themeIcon.className = 'fas fa-moon';
+    }
+}
+
+// Переключение темы
+document.getElementById('themeToggle').addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
 });
+
+// Загрузка сохраненной темы
+const savedTheme = localStorage.getItem('theme') || 'light';
+setTheme(savedTheme);
 
 // Функция для проверки существования элемента
 function getElement(id) {
@@ -20,69 +43,74 @@ function getElement(id) {
     return element;
 }
 
-// Показать интерфейс для неавторизованного пользователя
-function showUnauthorizedUI() {
-    const welcomeText = getElement('welcomeText');
-    const profileInfo = getElement('profileInfo');
-    const authButton = getElement('authButton');
-    const mainContent = getElement('mainContent');
+// Показать секцию контента
+function showSection(sectionId) {
+    // Скрываем все секции
+    const sections = document.querySelectorAll('.section');
+    sections.forEach(section => {
+        section.style.display = 'none';
+    });
 
-    if (welcomeText) welcomeText.style.display = 'block';
-    if (profileInfo) profileInfo.style.display = 'none';
-    if (authButton) authButton.style.display = 'block';
-    if (mainContent) mainContent.style.display = 'none';
+    // Убираем активный класс со всех пунктов меню
+    const menuItems = document.querySelectorAll('.menu-item');
+    menuItems.forEach(item => {
+        item.classList.remove('active');
+    });
+
+    // Показываем выбранную секцию
+    const selectedSection = getElement(sectionId);
+    if (selectedSection) {
+        selectedSection.style.display = 'block';
+        // Добавляем анимацию
+        selectedSection.classList.remove('fade-in');
+        void selectedSection.offsetWidth; // Форсируем перерисовку
+        selectedSection.classList.add('fade-in');
+    }
+
+    // Добавляем активный класс к выбранному пункту меню
+    const selectedMenuItem = document.querySelector(`.menu-item[onclick="showSection('${sectionId}')"]`);
+    if (selectedMenuItem) {
+        selectedMenuItem.classList.add('active');
+    }
 }
 
 // Показать интерфейс для авторизованного пользователя
 function showAuthorizedUI(user) {
-    const welcomeText = getElement('welcomeText');
-    const profileInfo = getElement('profileInfo');
-    const authButton = getElement('authButton');
+    const authSection = getElement('authSection');
     const mainContent = getElement('mainContent');
-    const userName = getElement('userName');
+    const userProfile = getElement('userProfile');
     const userAvatar = getElement('userAvatar');
-    const menuUserName = getElement('menuUserName');
-    const menuUserAvatar = getElement('menuUserAvatar');
-    const menuUserStatus = getElement('menuUserStatus');
+    const userName = getElement('userName');
 
-    if (welcomeText) welcomeText.style.display = 'none';
-    if (profileInfo) profileInfo.style.display = 'block';
-    if (authButton) authButton.style.display = 'none';
+    if (authSection) authSection.style.display = 'none';
     if (mainContent) mainContent.style.display = 'block';
+    if (userProfile) userProfile.style.display = 'flex';
 
-    // Обновляем информацию пользователя в шапке
+    // Обновляем информацию пользователя
     if (userName) {
-        const fullName = user.first_name + (user.last_name ? ' ' + user.last_name : '');
-        userName.textContent = fullName;
+        userName.textContent = user.first_name + (user.last_name ? ' ' + user.last_name : '');
     }
 
-    // Обновляем информацию в главном меню
-    if (menuUserName) {
-        const fullName = user.first_name + (user.last_name ? ' ' + user.last_name : '');
-        menuUserName.textContent = fullName;
+    if (userAvatar && user.photo_url) {
+        userAvatar.src = user.photo_url;
     }
 
-    if (menuUserStatus) {
-        menuUserStatus.textContent = user.username ? '@' + user.username : 'Telegram User';
-    }
-
-    // Обновляем аватары
-    if (user.photo_url) {
-        if (userAvatar) {
-            userAvatar.style.backgroundImage = `url(${user.photo_url})`;
-            userAvatar.style.backgroundSize = 'cover';
-        }
-        if (menuUserAvatar) {
-            menuUserAvatar.style.backgroundImage = `url(${user.photo_url})`;
-            menuUserAvatar.style.backgroundSize = 'cover';
-        }
-    }
-
-    // Инициализируем обработчики для разделов
-    initializeSections();
+    // Показываем первую секцию по умолчанию
+    showSection('create-bot');
 
     // Отправляем данные в бот
     sendUserDataToBot(user);
+}
+
+// Показать интерфейс для неавторизованного пользователя
+function showUnauthorizedUI() {
+    const authSection = getElement('authSection');
+    const mainContent = getElement('mainContent');
+    const userProfile = getElement('userProfile');
+
+    if (authSection) authSection.style.display = 'block';
+    if (mainContent) mainContent.style.display = 'none';
+    if (userProfile) userProfile.style.display = 'none';
 }
 
 // Отправка данных пользователя в бот
@@ -104,10 +132,18 @@ function sendUserDataToBot(user) {
     }
 }
 
-// Основная логика приложения
+// Обработчики форм
+document.getElementById('createBotForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const botName = document.getElementById('botName').value;
+    const botDescription = document.getElementById('botDescription').value;
+
+    // Здесь будет логика создания бота
+    console.log('Создание бота:', { botName, botDescription });
+});
+
+// Инициализация приложения
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Приложение загружено');
-    
     // Скрываем загрузку
     const loading = getElement('loading');
     const app = getElement('app');
@@ -115,78 +151,41 @@ document.addEventListener('DOMContentLoaded', function() {
     if (loading) loading.style.display = 'none';
     if (app) app.style.display = 'block';
 
-    // Проверяем инициализацию WebApp
+    // Проверяем авторизацию
     if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
         console.log('Пользователь авторизован:', tg.initDataUnsafe.user);
         showAuthorizedUI(tg.initDataUnsafe.user);
     } else {
-        console.log('Требуется авторизация через Telegram');
+        console.log('Требуется авторизация');
         showUnauthorizedUI();
     }
+});
 
-    // Добавляем обработчик для кнопки авторизации
-    const authButton = getElement('authButton');
-    if (authButton) {
-        authButton.addEventListener('click', function() {
-            if (!tg.initDataUnsafe.user) {
-                const message = document.createElement('div');
-                message.style.cssText = `
-                    position: fixed;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    background: rgba(0, 0, 0, 0.8);
-                    color: white;
-                    padding: 20px;
-                    border-radius: 10px;
-                    text-align: center;
-                    z-index: 1000;
-                `;
-                message.innerHTML = `
-                    <h3 style="margin-bottom: 10px;">Это приложение доступно только через Telegram</h3>
-                    <p>Пожалуйста, откройте бота в Telegram и нажмите кнопку "Открыть приложение"</p>
-                `;
-                document.body.appendChild(message);
-                
-                setTimeout(() => {
-                    message.remove();
-                }, 3000);
-            }
-        });
+// Обработка кнопки авторизации
+document.getElementById('authButton')?.addEventListener('click', function() {
+    if (!tg.initDataUnsafe.user) {
+        showNotification('Это приложение доступно только через Telegram', 'error');
     }
 });
+
+// Показ уведомлений
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type} fade-in`;
+    notification.innerHTML = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.classList.add('fade-out');
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
 
 // Обработка закрытия приложения
 tg.onEvent('mainButtonClicked', function() {
     tg.close();
 });
-
-// Функция для показа секции контента
-function showSection(sectionId) {
-    // Скрываем все секции
-    const sections = document.querySelectorAll('.content-section');
-    sections.forEach(section => {
-        section.style.display = 'none';
-    });
-
-    // Убираем активный класс со всех пунктов меню
-    const menuItems = document.querySelectorAll('.menu-item');
-    menuItems.forEach(item => {
-        item.classList.remove('active');
-    });
-
-    // Показываем выбранную секцию
-    const selectedSection = document.getElementById(sectionId);
-    if (selectedSection) {
-        selectedSection.style.display = 'block';
-    }
-
-    // Добавляем активный класс к выбранному пункту меню
-    const selectedMenuItem = document.querySelector(`.menu-item[onclick="showSection('${sectionId}')"]`);
-    if (selectedMenuItem) {
-        selectedMenuItem.classList.add('active');
-    }
-}
 
 // Инициализация разделов
 function initializeSections() {
