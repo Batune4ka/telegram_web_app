@@ -725,4 +725,47 @@ body {
 
 .canvas-block {
     animation: blockAppear 0.3s ease-out;
+}
+
+/* Добавляем стили для перехода между страницами */
+.page-transition {
+    animation: pageTransition 0.3s ease-out;
+}
+
+@keyframes pageTransition {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Обновляем стили для контейнера на странице конструктора */
+.container {
+    max-width: 100%;
+    padding: 1rem;
+    margin-top: 60px;
+}
+
+/* Добавляем стили для кнопки возврата */
+.back-button {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--primary);
+    color: white;
+    padding: 1rem;
+    border-radius: 50%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.back-button:hover {
+    transform: scale(1.1);
+    background: var(--secondary);
 } 

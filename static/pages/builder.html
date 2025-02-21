@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Конструктор бота | G-113 Constructor</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="nav-bar">
+        <a href="../index.html" class="nav-logo">
+            <i class="fab fa-telegram"></i> G-113 Constructor
+        </a>
+        <div class="nav-links">
+            <button id="themeToggle" class="theme-toggle">
+                <i class="fas fa-moon"></i>
+            </button>
+            <div id="userProfile" class="user-profile" style="display: none;">
+                <img id="userAvatar" class="user-avatar" src="" alt="User Avatar">
+                <span id="userName">User Name</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Конструктор бота -->
+    <div class="container">
+        <div class="bot-builder">
+            <!-- Боковая панель с блоками -->
+            <div class="builder-sidebar">
+                <h3>Блоки</h3>
+                <div class="blocks-category">
+                    <h4>Триггеры</h4>
+                    <div class="block-item" draggable="true" data-block-type="command">
+                        <i class="fas fa-terminal"></i>
+                        <span>Команда</span>
+                    </div>
+                    <div class="block-item" draggable="true" data-block-type="message">
+                        <i class="fas fa-comment"></i>
+                        <span>Сообщение</span>
+                    </div>
+                    <div class="block-item" draggable="true" data-block-type="button">
+                        <i class="fas fa-square"></i>
+                        <span>Кнопка</span>
+                    </div>
+                </div>
+                <div class="blocks-category">
+                    <h4>Действия</h4>
+                    <div class="block-item" draggable="true" data-block-type="send-message">
+                        <i class="fas fa-paper-plane"></i>
+                        <span>Отправить сообщение</span>
+                    </div>
+                    <div class="block-item" draggable="true" data-block-type="send-photo">
+                        <i class="fas fa-image"></i>
+                        <span>Отправить фото</span>
+                    </div>
+                    <div class="block-item" draggable="true" data-block-type="keyboard">
+                        <i class="fas fa-keyboard"></i>
+                        <span>Клавиатура</span>
+                    </div>
+                </div>
+                <div class="blocks-category">
+                    <h4>Логика</h4>
+                    <div class="block-item" draggable="true" data-block-type="if">
+                        <i class="fas fa-code-branch"></i>
+                        <span>Условие</span>
+                    </div>
+                    <div class="block-item" draggable="true" data-block-type="delay">
+                        <i class="fas fa-clock"></i>
+                        <span>Задержка</span>
+                    </div>
+                    <div class="block-item" draggable="true" data-block-type="variable">
+                        <i class="fas fa-database"></i>
+                        <span>Переменная</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Основная область конструктора -->
+            <div class="builder-main">
+                <div class="builder-toolbar">
+                    <button class="btn btn-primary" onclick="saveBot()">
+                        <i class="fas fa-save"></i> Сохранить
+                    </button>
+                    <button class="btn btn-outline" onclick="testBot()">
+                        <i class="fas fa-play"></i> Тестировать
+                    </button>
+                    <button class="btn btn-outline" onclick="clearCanvas()">
+                        <i class="fas fa-trash"></i> Очистить
+                    </button>
+                </div>
+                <div class="builder-canvas" id="builderCanvas">
+                    <!-- Здесь будут размещаться блоки -->
+                </div>
+            </div>
+
+            <!-- Панель свойств -->
+            <div class="builder-properties">
+                <h3>Свойства</h3>
+                <div id="blockProperties">
+                    <p class="no-selection-text">Выберите блок для настройки</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/app.js"></script>
+    <script src="../js/builder.js"></script>
+</body>
+</html> 
