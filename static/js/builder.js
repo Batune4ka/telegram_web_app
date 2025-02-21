@@ -1,6 +1,7 @@
 class BotBuilder {
     constructor() {
         this.canvas = document.getElementById('builderCanvas');
+        this.propertiesPanel = document.getElementById('blockProperties');
         this.blocks = new Map();
         this.connections = new Set();
         this.selectedBlock = null;
@@ -17,17 +18,18 @@ class BotBuilder {
     }
 
     initializeEventListeners() {
-        // Обработка перетаскивания блоков из сайдбара
-        document.querySelectorAll('.block-item').forEach(block => {
+        // Обработчики для блоков в сайдбаре
+        const sidebarBlocks = document.querySelectorAll('.block-item');
+        sidebarBlocks.forEach(block => {
+            block.draggable = true;
             block.addEventListener('dragstart', (e) => {
                 e.dataTransfer.setData('blockType', block.dataset.blockType);
             });
         });
 
-        // Обработка холста
+        // Обработчики для холста
         this.canvas.addEventListener('dragover', (e) => {
             e.preventDefault();
-            e.dataTransfer.dropEffect = 'copy';
         });
 
         this.canvas.addEventListener('drop', (e) => {
@@ -92,42 +94,31 @@ class BotBuilder {
     createBlock(type, x, y) {
         const block = document.createElement('div');
         block.className = 'canvas-block';
+        block.draggable = true;
         block.dataset.blockType = type;
         block.style.left = `${x}px`;
         block.style.top = `${y}px`;
 
-        // Создаем содержимое блока
+        // Добавляем содержимое блока
         const content = this.createBlockContent(type);
         block.appendChild(content);
 
-        // Добавляем коннекторы
-        const connectors = this.createConnectors(type);
-        connectors.forEach(conn => block.appendChild(conn));
-
-        // Делаем блок перетаскиваемым
-        block.addEventListener('mousedown', (e) => {
-            if (e.target.classList.contains('block-connector')) return;
-            
+        // Добавляем обработчики для перетаскивания
+        block.addEventListener('dragstart', (e) => {
             this.draggedBlock = block;
             const rect = block.getBoundingClientRect();
             this.offset.x = e.clientX - rect.left;
             this.offset.y = e.clientY - rect.top;
-            
-            // Выбираем блок для редактирования
+        });
+
+        block.addEventListener('click', () => {
             this.selectBlock(block);
         });
 
         this.canvas.appendChild(block);
-        
-        // Сохраняем данные блока
         this.blocks.set(block.id, {
-            element: block,
             type: type,
-            properties: this.getDefaultProperties(type),
-            connections: {
-                inputs: [],
-                outputs: []
-            }
+            properties: this.getDefaultProperties(type)
         });
 
         return block;
@@ -136,7 +127,7 @@ class BotBuilder {
     createBlockContent(type) {
         const content = document.createElement('div');
         content.className = 'block-content';
-
+        
         const icon = document.createElement('i');
         const title = document.createElement('span');
         
@@ -173,44 +164,54 @@ class BotBuilder {
                 icon.className = 'fas fa-cube';
                 title.textContent = 'Блок';
         }
-
+        
         content.appendChild(icon);
         content.appendChild(title);
         return content;
     }
 
-    createConnectors(type) {
-        const connectors = [];
-        
-        // Входной коннектор (сверху)
-        const input = document.createElement('div');
-        input.className = 'block-connector input';
-        input.dataset.connectorType = 'input';
-        connectors.push(input);
-
-        // Выходные коннекторы (снизу)
-        if (type === 'if') {
-            // Для условного блока создаем два выхода
-            const outputTrue = document.createElement('div');
-            outputTrue.className = 'block-connector output output-true';
-            outputTrue.dataset.connectorType = 'output-true';
-            outputTrue.setAttribute('title', 'True');
-
-            const outputFalse = document.createElement('div');
-            outputFalse.className = 'block-connector output output-false';
-            outputFalse.dataset.connectorType = 'output-false';
-            outputFalse.setAttribute('title', 'False');
-
-            connectors.push(outputTrue, outputFalse);
-        } else {
-            // Для остальных блоков один выход
-            const output = document.createElement('div');
-            output.className = 'block-connector output';
-            output.dataset.connectorType = 'output';
-            connectors.push(output);
+    getDefaultProperties(type) {
+        switch(type) {
+            case 'command':
+                return {
+                    command: '',
+                    description: '',
+                    response: ''
+                };
+            case 'message':
+                return {
+                    pattern: '',
+                    response: ''
+                };
+            case 'button':
+                return {
+                    text: '',
+                    callback_data: '',
+                    url: ''
+                };
+            case 'send-message':
+                return {
+                    pattern: '',
+                    response: ''
+                };
+            case 'if':
+                return {
+                    condition: '',
+                    true_branch: '',
+                    false_branch: ''
+                };
+            case 'delay':
+                return {
+                    duration: ''
+                };
+            case 'variable':
+                return {
+                    name: '',
+                    value: ''
+                };
+            default:
+                return {};
         }
-
-        return connectors;
     }
 
     selectBlock(block) {
@@ -220,6 +221,67 @@ class BotBuilder {
         this.selectedBlock = block;
         block.classList.add('selected');
         this.showBlockProperties(block);
+    }
+
+    showBlockProperties(block) {
+        const blockData = this.blocks.get(block.id);
+        const properties = blockData.properties;
+        
+        this.propertiesPanel.innerHTML = '';
+        const title = document.createElement('h3');
+        title.textContent = `Настройки ${this.getBlockTitle(blockData.type)}`;
+        this.propertiesPanel.appendChild(title);
+
+        for (const [key, value] of Object.entries(properties)) {
+            const group = document.createElement('div');
+            group.className = 'property-group';
+
+            const label = document.createElement('label');
+            label.textContent = this.getPropertyLabel(key);
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = value;
+            input.addEventListener('change', (e) => {
+                properties[key] = e.target.value;
+            });
+
+            group.appendChild(label);
+            group.appendChild(input);
+            this.propertiesPanel.appendChild(group);
+        }
+    }
+
+    getBlockTitle(type) {
+        const titles = {
+            'command': 'команды',
+            'message': 'сообщения',
+            'button': 'кнопки',
+            'send-message': 'отправки',
+            'if': 'условия',
+            'delay': 'задержки',
+            'variable': 'переменной'
+        };
+        return titles[type] || 'блока';
+    }
+
+    getPropertyLabel(key) {
+        const labels = {
+            'command': 'Команда',
+            'description': 'Описание',
+            'response': 'Ответ',
+            'pattern': 'Шаблон',
+            'text': 'Текст',
+            'callback_data': 'Callback data',
+            'url': 'URL',
+            'condition': 'Условие',
+            'true_branch': 'True branch',
+            'false_branch': 'False branch',
+            'duration': 'Duration',
+            'name': 'Name',
+            'value': 'Value'
+        };
+        return labels[key] || key;
     }
 
     async saveBot() {
@@ -364,57 +426,41 @@ const style = document.createElement('style');
 style.textContent = `
     .canvas-block {
         position: absolute;
-        background: var(--surface);
-        border: 2px solid var(--border);
+        background: white;
+        border: 2px solid #ddd;
         border-radius: 8px;
-        padding: 1rem;
+        padding: 15px;
         min-width: 150px;
         cursor: move;
         user-select: none;
-        z-index: 1;
-        transition: border-color 0.3s ease;
     }
 
     .canvas-block.selected {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 2px var(--primary-light);
+        border-color: #2196F3;
+        box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
     }
 
-    .canvas-block .block-content {
+    .block-content {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 10px;
     }
 
-    .canvas-block i {
-        color: var(--primary);
-        font-size: 1.2rem;
+    .property-group {
+        margin-bottom: 15px;
     }
 
-    .block-connector {
-        position: absolute;
-        width: 12px;
-        height: 12px;
-        background: var(--surface);
-        border: 2px solid var(--primary);
-        border-radius: 50%;
-        cursor: pointer;
+    .property-group label {
+        display: block;
+        margin-bottom: 5px;
+        color: var(--text-secondary);
     }
 
-    .block-connector.input {
-        top: -6px;
-        left: 50%;
-        transform: translateX(-50%);
-    }
-
-    .block-connector.output {
-        bottom: -6px;
-        left: 50%;
-        transform: translateX(-50%);
-    }
-
-    .block-connector:hover {
-        background: var(--primary);
+    .property-group input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid var(--border);
+        border-radius: 4px;
     }
 `;
 
