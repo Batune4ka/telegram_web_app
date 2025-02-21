@@ -16,6 +16,57 @@ class BotBuilder {
         this.loadUserData();
     }
 
+    initializeEventListeners() {
+        // Обработка перетаскивания блоков из сайдбара
+        document.querySelectorAll('.block-item').forEach(block => {
+            block.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('blockType', block.dataset.blockType);
+            });
+        });
+
+        // Обработка холста
+        this.canvas.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+        });
+
+        this.canvas.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const blockType = e.dataTransfer.getData('blockType');
+            if (blockType) {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                this.createBlock(blockType, x, y);
+            }
+        });
+
+        // Обработка перемещения существующих блоков
+        document.addEventListener('mousemove', (e) => {
+            if (this.draggedBlock) {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left - this.offset.x;
+                const y = e.clientY - rect.top - this.offset.y;
+                
+                // Ограничиваем перемещение пределами холста
+                const maxX = rect.width - this.draggedBlock.offsetWidth;
+                const maxY = rect.height - this.draggedBlock.offsetHeight;
+                
+                this.draggedBlock.style.left = `${Math.max(0, Math.min(x, maxX))}px`;
+                this.draggedBlock.style.top = `${Math.max(0, Math.min(y, maxY))}px`;
+                
+                // Обновляем соединения
+                this.updateConnections();
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (this.draggedBlock) {
+                this.draggedBlock = null;
+            }
+        });
+    }
+
     async loadUserData() {
         const tg = window.Telegram.WebApp;
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
@@ -38,40 +89,38 @@ class BotBuilder {
         }
     }
 
-    createBlock(type, x, y, id = null) {
-        const blockId = id || `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    createBlock(type, x, y) {
         const block = document.createElement('div');
         block.className = 'canvas-block';
-        block.id = blockId;
         block.dataset.blockType = type;
         block.style.left = `${x}px`;
         block.style.top = `${y}px`;
 
+        // Создаем содержимое блока
         const content = this.createBlockContent(type);
-        const header = document.createElement('div');
-        header.className = 'block-header';
-        header.appendChild(content);
-
-        // Добавляем кнопку удаления
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'block-delete-btn';
-        deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
-        deleteBtn.onclick = (e) => {
-            e.stopPropagation();
-            this.deleteBlock(block);
-        };
-        header.appendChild(deleteBtn);
-
-        block.appendChild(header);
+        block.appendChild(content);
 
         // Добавляем коннекторы
         const connectors = this.createConnectors(type);
         connectors.forEach(conn => block.appendChild(conn));
 
+        // Делаем блок перетаскиваемым
+        block.addEventListener('mousedown', (e) => {
+            if (e.target.classList.contains('block-connector')) return;
+            
+            this.draggedBlock = block;
+            const rect = block.getBoundingClientRect();
+            this.offset.x = e.clientX - rect.left;
+            this.offset.y = e.clientY - rect.top;
+            
+            // Выбираем блок для редактирования
+            this.selectBlock(block);
+        });
+
         this.canvas.appendChild(block);
         
         // Сохраняем данные блока
-        this.blocks.set(blockId, {
+        this.blocks.set(block.id, {
             element: block,
             type: type,
             properties: this.getDefaultProperties(type),
@@ -81,10 +130,53 @@ class BotBuilder {
             }
         });
 
-        // Делаем блок перетаскиваемым
-        this.makeBlockDraggable(block);
-
         return block;
+    }
+
+    createBlockContent(type) {
+        const content = document.createElement('div');
+        content.className = 'block-content';
+
+        const icon = document.createElement('i');
+        const title = document.createElement('span');
+        
+        switch(type) {
+            case 'command':
+                icon.className = 'fas fa-terminal';
+                title.textContent = 'Команда';
+                break;
+            case 'message':
+                icon.className = 'fas fa-comment';
+                title.textContent = 'Сообщение';
+                break;
+            case 'button':
+                icon.className = 'fas fa-square';
+                title.textContent = 'Кнопка';
+                break;
+            case 'send-message':
+                icon.className = 'fas fa-paper-plane';
+                title.textContent = 'Отправить';
+                break;
+            case 'if':
+                icon.className = 'fas fa-code-branch';
+                title.textContent = 'Условие';
+                break;
+            case 'delay':
+                icon.className = 'fas fa-clock';
+                title.textContent = 'Задержка';
+                break;
+            case 'variable':
+                icon.className = 'fas fa-database';
+                title.textContent = 'Переменная';
+                break;
+            default:
+                icon.className = 'fas fa-cube';
+                title.textContent = 'Блок';
+        }
+
+        content.appendChild(icon);
+        content.appendChild(title);
+        return content;
     }
 
     createConnectors(type) {
@@ -121,62 +213,13 @@ class BotBuilder {
         return connectors;
     }
 
-    makeBlockDraggable(block) {
-        block.addEventListener('mousedown', (e) => {
-            if (e.target.classList.contains('block-connector')) return;
-            
-            this.draggedBlock = block;
-            const rect = block.getBoundingClientRect();
-            this.offset.x = e.clientX - rect.left;
-            this.offset.y = e.clientY - rect.top;
-            this.selectBlock(block);
-        });
-    }
-
-    createConnection(startConnector, endConnector) {
-        if (!startConnector || !endConnector) return;
-        
-        const connection = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        connection.classList.add('connection');
-        
-        const startBlock = startConnector.closest('.canvas-block');
-        const endBlock = endConnector.closest('.canvas-block');
-        
-        // Сохраняем связь
-        this.connections.add({
-            element: connection,
-            from: {
-                block: startBlock.id,
-                connector: startConnector.dataset.connectorType
-            },
-            to: {
-                block: endBlock.id,
-                connector: endConnector.dataset.connectorType
-            }
-        });
-
-        this.updateConnectionPath(connection, startConnector, endConnector);
-        this.canvas.appendChild(connection);
-    }
-
-    updateConnectionPath(connection, start, end) {
-        const startRect = start.getBoundingClientRect();
-        const endRect = end.getBoundingClientRect();
-        const canvasRect = this.canvas.getBoundingClientRect();
-
-        const startX = startRect.left + startRect.width / 2 - canvasRect.left;
-        const startY = startRect.top + startRect.height / 2 - canvasRect.top;
-        const endX = endRect.left + endRect.width / 2 - canvasRect.left;
-        const endY = endRect.top + endRect.height / 2 - canvasRect.top;
-
-        const controlPointOffset = Math.abs(endY - startY) / 2;
-        
-        const path = `M ${startX} ${startY} 
-                     C ${startX} ${startY + controlPointOffset},
-                       ${endX} ${endY - controlPointOffset},
-                       ${endX} ${endY}`;
-                       
-        connection.setAttribute('d', path);
+    selectBlock(block) {
+        if (this.selectedBlock) {
+            this.selectedBlock.classList.remove('selected');
+        }
+        this.selectedBlock = block;
+        block.classList.add('selected');
+        this.showBlockProperties(block);
     }
 
     async saveBot() {
@@ -316,7 +359,69 @@ function saveBotSettings() {
     showNotification('Настройки сохранены', 'success');
 }
 
-// При загрузке страницы
+// Добавляем стили для блоков на холсте
+const style = document.createElement('style');
+style.textContent = `
+    .canvas-block {
+        position: absolute;
+        background: var(--surface);
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        padding: 1rem;
+        min-width: 150px;
+        cursor: move;
+        user-select: none;
+        z-index: 1;
+        transition: border-color 0.3s ease;
+    }
+
+    .canvas-block.selected {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px var(--primary-light);
+    }
+
+    .canvas-block .block-content {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .canvas-block i {
+        color: var(--primary);
+        font-size: 1.2rem;
+    }
+
+    .block-connector {
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        background: var(--surface);
+        border: 2px solid var(--primary);
+        border-radius: 50%;
+        cursor: pointer;
+    }
+
+    .block-connector.input {
+        top: -6px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .block-connector.output {
+        bottom: -6px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .block-connector:hover {
+        background: var(--primary);
+    }
+`;
+
+document.head.appendChild(style);
+
+// Инициализация при загрузке страницы
+let botBuilder;
 document.addEventListener('DOMContentLoaded', () => {
     botBuilder = new BotBuilder();
     botBuilder.loadBotSettings();
