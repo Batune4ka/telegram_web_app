@@ -10,16 +10,16 @@ router = Router()
 db = Database('database/bot.db')
 
 def get_webapp_keyboard():
-    keyboard = ReplyKeyboardMarkup(
+    return ReplyKeyboardMarkup(
         keyboard=[
             [KeyboardButton(
                 text="Открыть приложение", 
                 web_app=WebAppInfo(url=config.WEB_APP_URL)
             )]
         ],
-        resize_keyboard=True
+        resize_keyboard=True,
+        is_persistent=True
     )
-    return keyboard
 
 @router.message(Command("start"))
 async def cmd_start(message: types.Message):
@@ -37,20 +37,11 @@ async def cmd_start(message: types.Message):
     )
 
 @router.message()
-async def handle_web_app_data(message: types.Message):
+async def handle_webapp_data(message: types.Message):
     if message.web_app_data:
         try:
-            data = json.loads(message.web_app_data.data)
-            if data.get('type') == 'auth':
-                user_data = data.get('user')
-                if user_data and user_data.get('id'):
-                    # Обновляем информацию о пользователе в БД
-                    db.add_user(
-                        user_data['id'],
-                        user_data.get('username'),
-                        user_data.get('first_name'),
-                        user_data.get('last_name')
-                    )
-                    await message.answer("Авторизация успешна!")
-        except json.JSONDecodeError:
-            await message.answer("Получены некорректные данные") 
+            print(f"Получены данные: {message.web_app_data.data}")
+            await message.answer("Данные получены!")
+        except Exception as e:
+            print(f"Ошибка: {e}")
+            await message.answer("Произошла ошибка при обработке данных") 
