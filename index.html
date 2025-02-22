@@ -3,138 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram WebApp</title>
+    <title>G-113 Constructor</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Добавляем префикс ./ к путям -->
-    <link rel="stylesheet" href="./static/css/style.css">
+    <link rel="stylesheet" href="static/css/style.css?v=1.2">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <!-- Добавляем иконки -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <!-- Навигация -->
     <nav class="nav-bar">
-        <a href="#" class="nav-logo">
-            <i class="fab fa-telegram"></i> G-113 Constructor
-        </a>
-        <div class="nav-links">
+        <div class="nav-left">
+            <a href="index.html" class="nav-logo">
+                <i class="fab fa-telegram"></i> G-113 Constructor
+            </a>
+        </div>
+        <div class="nav-right">
             <button id="themeToggle" class="theme-toggle">
                 <i class="fas fa-moon"></i>
             </button>
-            <div id="userProfile" class="user-profile" style="display: none;">
-                <img id="userAvatar" class="user-avatar" src="" alt="User Avatar">
-                <span id="userName">User Name</span>
-            </div>
         </div>
     </nav>
 
-    <!-- Загрузка -->
-    <div id="loading" class="loading-screen">
-        <div class="loader"></div>
-        <p>Загрузка...</p>
-    </div>
-
-    <!-- Основной контент -->
-    <div class="container" id="app" style="display: none;">
-        <!-- Секция авторизации -->
-        <div id="authSection" class="auth-section">
-            <div class="card auth-card">
-                <div class="welcome-text">
-                    <h1>Добро пожаловать</h1>
-                    <p>Создавайте и управляйте своими Telegram ботами</p>
+    <div class="container">
+        <!-- Профиль пользователя -->
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <img src="static/images/default-avatar.png" alt="Avatar" id="userAvatar">
                 </div>
-                <button id="authButton" class="btn btn-primary">
-                    <i class="fab fa-telegram"></i> Войти через Telegram
-                </button>
+                <div class="profile-info">
+                    <h2 id="userName">Пользователь</h2>
+                    <p class="profile-status">
+                        <i class="fas fa-circle"></i> Online
+                    </p>
+                </div>
+            </div>
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <span class="stat-value" id="botsCount">0</span>
+                    <span class="stat-label">Ботов</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="messagesCount">0</span>
+                    <span class="stat-label">Сообщений</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="commandsCount">0</span>
+                    <span class="stat-label">Команд</span>
+                </div>
             </div>
         </div>
 
-        <!-- Главное меню -->
-        <div id="mainContent" class="main-content" style="display: none;">
-            <!-- Сетка меню -->
-            <div class="menu-grid">
-                <a href="./static/pages/builder.html" class="menu-item">
+        <!-- Основные действия -->
+        <div class="actions-grid">
+            <a href="static/pages/builder.html" class="action-card">
+                <div class="action-icon">
+                    <i class="fas fa-plus-circle"></i>
+                </div>
+                <h3>Создать бота</h3>
+                <p>Создайте нового бота с нуля</p>
+            </a>
+
+            <a href="static/pages/my-bots.html" class="action-card">
+                <div class="action-icon">
                     <i class="fas fa-robot"></i>
-                    <h3>Создать бота</h3>
-                    <p>Создайте своего Telegram бота</p>
-                </a>
-
-                <div class="card menu-item" onclick="showSection('my-bots')">
-                    <i class="fas fa-cogs"></i>
-                    <h3>Мои боты</h3>
-                    <p>Управление вашими ботами</p>
                 </div>
+                <h3>Мои боты</h3>
+                <p>Управление вашими ботами</p>
+            </a>
 
-                <div class="card menu-item" onclick="showSection('templates')">
+            <a href="static/pages/templates.html" class="action-card">
+                <div class="action-icon">
                     <i class="fas fa-copy"></i>
-                    <h3>Шаблоны</h3>
-                    <p>Готовые шаблоны ботов</p>
                 </div>
+                <h3>Шаблоны</h3>
+                <p>Готовые шаблоны ботов</p>
+            </a>
 
-                <div class="card menu-item" onclick="showSection('settings')">
-                    <i class="fas fa-cog"></i>
-                    <h3>Настройки</h3>
-                    <p>Персонализация и настройки</p>
+            <a href="static/pages/profile.html" class="action-card">
+                <div class="action-icon">
+                    <i class="fas fa-user-cog"></i>
                 </div>
-            </div>
+                <h3>Настройки</h3>
+                <p>Управление профилем</p>
+            </a>
+        </div>
 
-            <!-- Секции контента -->
-            <div id="contentSections" class="content-sections">
-                <!-- Мои боты -->
-                <div id="my-bots" class="section fade-in" style="display: none;">
-                    <div class="card">
-                        <h2>Мои боты</h2>
-                        <div id="botsList" class="bots-grid">
-                            <!-- Боты будут добавляться динамически -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Шаблоны -->
-                <div id="templates" class="section fade-in" style="display: none;">
-                    <div class="card">
-                        <h2>Шаблоны ботов</h2>
-                        <div class="templates-grid">
-                            <div class="template-card">
-                                <h3>Эхо бот</h3>
-                                <p>Простой бот, который повторяет сообщения</p>
-                                <button class="btn btn-outline">Использовать</button>
-                            </div>
-                            <div class="template-card">
-                                <h3>Опросы</h3>
-                                <p>Бот для создания и управления опросами</p>
-                                <button class="btn btn-outline">Использовать</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Настройки -->
-                <div id="settings" class="section fade-in" style="display: none;">
-                    <div class="card">
-                        <h2>Настройки</h2>
-                        <div class="settings-grid">
-                            <div class="setting-item">
-                                <h3>Тема</h3>
-                                <div class="theme-selector">
-                                    <button class="btn btn-outline" onclick="setTheme('light')">Светлая</button>
-                                    <button class="btn btn-outline" onclick="setTheme('dark')">Темная</button>
-                                </div>
-                            </div>
-                            <div class="setting-item">
-                                <h3>Уведомления</h3>
-                                <label class="switch">
-                                    <input type="checkbox" id="notificationsToggle">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <!-- Последние действия -->
+        <div class="recent-activity">
+            <h3>Последние действия</h3>
+            <div class="activity-list" id="activityList">
+                <!-- Активность будет добавляться через JavaScript -->
             </div>
         </div>
     </div>
-    <!-- Добавляем префикс ./ к пути -->
-    <script src="./static/js/app.js"></script>
+
+    <script src="static/js/app.js?v=1.2"></script>
 </body>
 </html> 

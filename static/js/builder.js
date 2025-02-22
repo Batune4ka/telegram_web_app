@@ -12,9 +12,25 @@ class BotBuilder {
         this.userId = null; // ID пользователя из Telegram
         this.botToken = null;
         this.botName = null;
+        this.currentStep = 1;
+        this.totalSteps = 5; // Добавили шаг для приветственного сообщения
+        this.botData = {
+            name: '',
+            description: '',
+            welcomeMessage: '',
+            commands: [],
+            messages: [],
+            buttons: [],
+            keyboard: {
+                type: 'standard', // или 'inline'
+                buttons: []
+            }
+        };
         
         this.initializeEventListeners();
         this.loadUserData();
+        this.initTheme();
+        this.showStep(1);
     }
 
     initializeEventListeners() {
@@ -354,6 +370,116 @@ class BotBuilder {
         }
     }
 
+    showStep(step) {
+        // Скрываем все шаги
+        document.querySelectorAll('.builder-step').forEach(el => el.classList.remove('active'));
+        // Показываем нужный шаг
+        document.querySelector(`#step${step}`).classList.add('active');
+        
+        // Обновляем прогресс-бар
+        document.querySelectorAll('.progress-step').forEach(el => {
+            const stepNum = parseInt(el.dataset.step);
+            if (stepNum <= step) {
+                el.classList.add('completed');
+            } else {
+                el.classList.remove('completed');
+            }
+            if (stepNum === step) {
+                el.classList.add('active');
+            } else {
+                el.classList.remove('active');
+            }
+        });
+
+        // Обновляем кнопки навигации
+        const prevBtn = document.getElementById('prevStep');
+        const nextBtn = document.getElementById('nextStep');
+        
+        prevBtn.style.display = step === 1 ? 'none' : 'block';
+        nextBtn.textContent = step === this.totalSteps ? 'Создать бота' : 'Далее';
+    }
+
+    addCommandTemplate() {
+        return `
+            <div class="command-block">
+                <div class="command-header">
+                    <input type="text" class="command-name" placeholder="/команда" required>
+                    <button class="btn-delete-command">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <input type="text" class="command-description" placeholder="Описание команды" required>
+                <textarea class="command-response" placeholder="Ответ на команду" required></textarea>
+                <div class="command-options">
+                    <label class="checkbox-container">
+                        <input type="checkbox" class="show-keyboard">
+                        <span>Показывать клавиатуру</span>
+                    </label>
+                </div>
+            </div>
+        `;
+    }
+
+    addKeyboardButtonTemplate() {
+        return `
+            <div class="keyboard-button">
+                <input type="text" placeholder="Текст кнопки" required>
+                <select class="button-action">
+                    <option value="text">Отправить текст</option>
+                    <option value="url">Открыть ссылку</option>
+                    <option value="callback">Callback</option>
+                </select>
+                <input type="text" placeholder="Значение" required>
+                <button class="btn-delete-button">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+    }
+
+    validateStep(step) {
+        switch(step) {
+            case 1: // Основная информация
+                return this.botData.name && this.botData.description;
+            case 2: // Приветственное сообщение
+                return this.botData.welcomeMessage;
+            case 3: // Команды
+                return this.botData.commands.length > 0;
+            case 4: // Сообщения
+                return true; // Необязательный шаг
+            case 5: // Клавиатура
+                return true; // Необязательный шаг
+            default:
+                return false;
+        }
+    }
+
+    showError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.textContent = message;
+        document.body.appendChild(errorDiv);
+        setTimeout(() => errorDiv.remove(), 3000);
+    }
+
+    showSuccess(message) {
+        const successDiv = document.createElement('div');
+        successDiv.className = 'success-message';
+        successDiv.textContent = message;
+        document.body.appendChild(successDiv);
+        setTimeout(() => successDiv.remove(), 3000);
+    }
+
+    createBot() {
+        // Здесь будет логика создания бота
+        console.log('Создание бота:', this.botData);
+        this.showSuccess('Бот успешно создан!');
+        // Можно добавить редирект на страницу управления ботом
+        setTimeout(() => {
+            window.location.href = '/my-bots.html';
+        }, 2000);
+    }
+
     // ... остальные методы класса ...
 }
 
@@ -509,6 +635,115 @@ style.textContent = `
 `;
 
 document.head.appendChild(style);
+
+// Добавляем стили
+const styles = `
+    .command-block {
+        background: var(--surface);
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .command-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .command-name {
+        font-size: 16px;
+        font-weight: 500;
+        border: none;
+        background: transparent;
+        color: var(--text-primary);
+        flex: 1;
+    }
+
+    .btn-delete-command {
+        background: none;
+        border: none;
+        color: var(--danger);
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 4px;
+    }
+
+    .command-description,
+    .command-response {
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 8px;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: var(--background);
+        color: var(--text-primary);
+    }
+
+    .command-response {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .keyboard-button {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .keyboard-button input,
+    .keyboard-button select {
+        padding: 8px;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: var(--background);
+        color: var(--text-primary);
+    }
+
+    .keyboard-button select {
+        min-width: 120px;
+    }
+
+    .checkbox-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+    }
+
+    .success-message,
+    .error-message {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 10px 20px;
+        border-radius: 4px;
+        color: white;
+        animation: slideUp 0.3s ease;
+    }
+
+    .success-message {
+        background: var(--success);
+    }
+
+    .error-message {
+        background: var(--danger);
+    }
+
+    @keyframes slideUp {
+        from { transform: translate(-50%, 100%); opacity: 0; }
+        to { transform: translate(-50%, 0); opacity: 1; }
+    }
+`;
+
+// Добавляем стили на страницу
+const styleSheet = document.createElement('style');
+styleSheet.textContent = styles;
+document.head.appendChild(styleSheet);
 
 // Инициализация при загрузке страницы
 let botBuilder;
