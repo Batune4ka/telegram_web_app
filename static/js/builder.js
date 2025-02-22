@@ -21,9 +21,11 @@ class BotBuilder {
             commands: [],
             messages: [],
             buttons: [],
-            keyboard: {
-                type: 'standard', // или 'inline'
-                buttons: []
+            settings: {
+                notifications: true,
+                autoResponder: false,
+                language: 'ru',
+                timezone: 'UTC+3'
             }
         };
         
@@ -86,6 +88,68 @@ class BotBuilder {
             if (this.draggedBlock) {
                 this.stopDragging();
             }
+        });
+
+        // Кнопки навигации
+        document.getElementById('prevStep').addEventListener('click', () => this.navigate(-1));
+        document.getElementById('nextStep').addEventListener('click', () => this.navigate(1));
+
+        // Добавление команды
+        document.getElementById('addCommand').addEventListener('click', () => {
+            this.showDialog('command', {
+                title: 'Добавить команду',
+                fields: [
+                    { name: 'command', label: 'Команда', type: 'text', placeholder: '/start', required: true },
+                    { name: 'description', label: 'Описание', type: 'text', placeholder: 'Начать работу с ботом' },
+                    { name: 'response', label: 'Ответ', type: 'textarea', placeholder: 'Привет! Я бот...' },
+                    { name: 'showButton', label: 'Показывать кнопку', type: 'checkbox' }
+                ],
+                onSave: (data) => {
+                    this.botData.commands.push(data);
+                    this.updateCommandsList();
+                }
+            });
+        });
+
+        // Добавление сообщения
+        document.getElementById('addMessage').addEventListener('click', () => {
+            this.showDialog('message', {
+                title: 'Добавить сообщение',
+                fields: [
+                    { name: 'trigger', label: 'Триггер', type: 'text', placeholder: 'привет', required: true },
+                    { name: 'response', label: 'Ответ', type: 'textarea', placeholder: 'Привет! Как дела?' },
+                    { name: 'isRegex', label: 'Использовать регулярное выражение', type: 'checkbox' }
+                ],
+                onSave: (data) => {
+                    this.botData.messages.push(data);
+                    this.updateMessagesList();
+                }
+            });
+        });
+
+        // Добавление кнопки
+        document.getElementById('addButton').addEventListener('click', () => {
+            this.showDialog('button', {
+                title: 'Добавить кнопку',
+                fields: [
+                    { name: 'text', label: 'Текст кнопки', type: 'text', required: true },
+                    { 
+                        name: 'type', 
+                        label: 'Тип кнопки', 
+                        type: 'select',
+                        options: [
+                            { value: 'text', label: 'Текстовая' },
+                            { value: 'url', label: 'Ссылка' },
+                            { value: 'callback', label: 'Callback' }
+                        ]
+                    },
+                    { name: 'value', label: 'Значение', type: 'text', required: true }
+                ],
+                onSave: (data) => {
+                    this.botData.buttons.push(data);
+                    this.updateButtonsList();
+                }
+            });
         });
     }
 
@@ -480,7 +544,153 @@ class BotBuilder {
         }, 2000);
     }
 
-    // ... остальные методы класса ...
+    showDialog(type, config) {
+        const dialog = document.createElement('div');
+        dialog.className = 'dialog-overlay';
+        dialog.innerHTML = `
+            <div class="dialog">
+                <div class="dialog-header">
+                    <h3>${config.title}</h3>
+                    <button class="dialog-close">×</button>
+                </div>
+                <form class="dialog-form">
+                    ${config.fields.map(field => this.createFormField(field)).join('')}
+                    <div class="dialog-actions">
+                        <button type="button" class="btn btn-secondary">Отмена</button>
+                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                    </div>
+                </form>
+            </div>
+        `;
+
+        document.body.appendChild(dialog);
+
+        // Обработчики событий
+        dialog.querySelector('.dialog-close').addEventListener('click', () => dialog.remove());
+        dialog.querySelector('.btn-secondary').addEventListener('click', () => dialog.remove());
+        
+        dialog.querySelector('form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            config.onSave(data);
+            dialog.remove();
+            this.showNotification('Успешно добавлено');
+        });
+    }
+
+    createFormField(field) {
+        switch(field.type) {
+            case 'text':
+                return `
+                    <div class="form-group">
+                        <label>${field.label}</label>
+                        <input type="text" name="${field.name}" 
+                               placeholder="${field.placeholder || ''}"
+                               ${field.required ? 'required' : ''}>
+                    </div>
+                `;
+            case 'textarea':
+                return `
+                    <div class="form-group">
+                        <label>${field.label}</label>
+                        <textarea name="${field.name}" 
+                                 placeholder="${field.placeholder || ''}"
+                                 ${field.required ? 'required' : ''}></textarea>
+                    </div>
+                `;
+            case 'select':
+                return `
+                    <div class="form-group">
+                        <label>${field.label}</label>
+                        <select name="${field.name}" ${field.required ? 'required' : ''}>
+                            ${field.options.map(opt => 
+                                `<option value="${opt.value}">${opt.label}</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                `;
+            case 'checkbox':
+                return `
+                    <div class="form-group checkbox">
+                        <label>
+                            <input type="checkbox" name="${field.name}">
+                            ${field.label}
+                        </label>
+                    </div>
+                `;
+            default:
+                return '';
+        }
+    }
+
+    navigate(direction) {
+        const newStep = this.currentStep + direction;
+        
+        if (newStep < 1 || newStep > this.totalSteps) return;
+        
+        if (direction > 0 && !this.validateStep(this.currentStep)) {
+            this.showNotification('Пожалуйста, заполните все обязательные поля', 'error');
+            return;
+        }
+
+        this.currentStep = newStep;
+        this.updateProgressBar();
+        this.showCurrentStep();
+        this.updateNavigationButtons();
+    }
+
+    showNotification(message, type = 'success') {
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 3000);
+    }
+
+    updateProgressBar() {
+        document.querySelectorAll('.progress-step').forEach((step, index) => {
+            if (index + 1 === this.currentStep) {
+                step.classList.add('active');
+            } else {
+                step.classList.remove('active');
+            }
+        });
+    }
+
+    showCurrentStep() {
+        document.querySelectorAll('.builder-step').forEach((step, index) => {
+            if (index + 1 === this.currentStep) {
+                step.classList.add('active');
+            } else {
+                step.classList.remove('active');
+            }
+        });
+    }
+
+    updateNavigationButtons() {
+        const prevBtn = document.getElementById('prevStep');
+        const nextBtn = document.getElementById('nextStep');
+
+        prevBtn.style.display = this.currentStep === 1 ? 'none' : 'block';
+        
+        if (this.currentStep === this.totalSteps) {
+            nextBtn.textContent = 'Создать бота';
+            nextBtn.classList.add('btn-success');
+        } else {
+            nextBtn.textContent = 'Далее';
+            nextBtn.classList.remove('btn-success');
+        }
+    }
+
+    finishBotCreation() {
+        // Здесь будет логика создания бота
+        console.log('Создание бота:', this.botData);
+        this.showNotification('Бот успешно создан!');
+        setTimeout(() => {
+            window.location.href = 'my-bots.html';
+        }, 2000);
+    }
 }
 
 // Функции для работы с модальным окном
