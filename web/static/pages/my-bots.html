@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои боты | G-113 Constructor</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="nav-bar">
+        <div class="nav-left">
+            <a href="../../index.html" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <a href="../../index.html" class="nav-logo">
+                <i class="fab fa-telegram"></i> G-113 Constructor
+            </a>
+        </div>
+        <div class="nav-links">
+            <button id="themeToggle" class="theme-toggle">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+    </nav>
+
+    <div class="bots-container">
+        <div class="bots-header">
+            <h2>Мои боты</h2>
+            <a href="./builder.html" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Новый бот
+            </a>
+        </div>
+        <div class="bots-list" id="botsList">
+            <!-- Боты будут добавлены через JavaScript -->
+        </div>
+    </div>
+
+    <script src="../js/my-bots.js"></script>
+</body>
+</html> 

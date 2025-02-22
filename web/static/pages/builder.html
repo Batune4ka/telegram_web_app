@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создать бота | G-113 Constructor</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="nav-bar">
+        <div class="nav-left">
+            <a href="../../index.html" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <span class="page-title">Создание бота</span>
+        </div>
+        <div class="nav-right">
+            <button id="themeToggle" class="theme-toggle">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+    </nav>
+
+    <div class="builder-container">
+        <div class="progress-bar">
+            <div class="progress-step active" data-step="1">
+                <div class="step-number">1</div>
+                <div class="step-label">Основное</div>
+            </div>
+            <div class="progress-step" data-step="2">
+                <div class="step-number">2</div>
+                <div class="step-label">Приветствие</div>
+            </div>
+            <div class="progress-step" data-step="3">
+                <div class="step-number">3</div>
+                <div class="step-label">Команды</div>
+            </div>
+            <div class="progress-step" data-step="4">
+                <div class="step-number">4</div>
+                <div class="step-label">Сообщения</div>
+            </div>
+            <div class="progress-step" data-step="5">
+                <div class="step-number">5</div>
+                <div class="step-label">Клавиатура</div>
+            </div>
+        </div>
+
+        <div class="builder-content">
+            <!-- Шаг 1: Основная информация -->
+            <div id="step1" class="builder-step active">
+                <h3>Основная информация</h3>
+                <div class="form-group">
+                    <label for="botName">Имя бота</label>
+                    <input type="text" id="botName" placeholder="Например: Helper Bot" required>
+                    <small>Имя вашего бота (будет отображаться в Telegram)</small>
+                </div>
+                <div class="form-group">
+                    <label for="botDescription">Описание бота</label>
+                    <textarea id="botDescription" placeholder="Опишите, что умеет ваш бот" required></textarea>
+                    <small>Краткое описание функционала бота</small>
+                </div>
+            </div>
+
+            <!-- Шаг 2: Приветственное сообщение -->
+            <div id="step2" class="builder-step">
+                <h3>Приветственное сообщение</h3>
+                <div class="form-group">
+                    <label for="welcomeMessage">Сообщение при старте</label>
+                    <textarea id="welcomeMessage" placeholder="Привет! Я бот, который поможет тебе..." required></textarea>
+                    <small>Это сообщение пользователь получит при первом запуске бота</small>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="showWelcomeKeyboard">
+                        <span>Показывать клавиатуру с приветствием</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Шаг 3: Команды -->
+            <div id="step3" class="builder-step">
+                <h3>Команды бота</h3>
+                <div id="commandsList" class="commands-list">
+                    <!-- Команды будут добавляться сюда -->
+                </div>
+                <button id="addCommand" class="add-button">
+                    <i class="fas fa-plus"></i> Добавить команду
+                </button>
+            </div>
+
+            <!-- Шаг 4: Сообщения -->
+            <div id="step4" class="builder-step">
+                <h3>Ответы на сообщения</h3>
+                <div id="messagesList" class="messages-list">
+                    <!-- Сообщения будут добавляться сюда -->
+                </div>
+                <button id="addMessage" class="add-button">
+                    <i class="fas fa-plus"></i> Добавить ответ
+                </button>
+            </div>
+
+            <!-- Шаг 5: Клавиатура -->
+            <div id="step5" class="builder-step">
+                <h3>Клавиатура бота</h3>
+                <div class="form-group">
+                    <label>Тип клавиатуры</label>
+                    <div class="keyboard-type-selector">
+                        <button class="keyboard-type active" data-type="standard">
+                            <i class="fas fa-keyboard"></i>
+                            <span>Стандартная</span>
+                        </button>
+                        <button class="keyboard-type" data-type="inline">
+                            <i class="fas fa-grip-horizontal"></i>
+                            <span>Inline</span>
+                        </button>
+                    </div>
+                </div>
+                <div id="keyboardButtons" class="keyboard-buttons">
+                    <!-- Кнопки будут добавляться сюда -->
+                </div>
+                <button id="addKeyboardButton" class="add-button">
+                    <i class="fas fa-plus"></i> Добавить кнопку
+                </button>
+            </div>
+        </div>
+
+        <div class="builder-actions">
+            <button id="prevStep" class="btn btn-back">
+                <i class="fas fa-arrow-left"></i> Назад
+            </button>
+            <button id="nextStep" class="btn btn-next">
+                Далее <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <script src="../js/builder.js"></script>
+</body>
+</html> 
