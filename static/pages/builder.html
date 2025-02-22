@@ -32,69 +32,106 @@
             </div>
             <div class="progress-step" data-step="2">
                 <div class="step-number">2</div>
-                <div class="step-label">Команды</div>
+                <div class="step-label">Приветствие</div>
             </div>
             <div class="progress-step" data-step="3">
                 <div class="step-number">3</div>
-                <div class="step-label">Сообщения</div>
+                <div class="step-label">Команды</div>
             </div>
             <div class="progress-step" data-step="4">
                 <div class="step-number">4</div>
-                <div class="step-label">Кнопки</div>
+                <div class="step-label">Сообщения</div>
+            </div>
+            <div class="progress-step" data-step="5">
+                <div class="step-number">5</div>
+                <div class="step-label">Клавиатура</div>
             </div>
         </div>
 
         <div class="builder-content">
-            <!-- Шаг 1: Основные настройки -->
-            <div class="builder-step active" id="step1">
+            <!-- Шаг 1: Основная информация -->
+            <div id="step1" class="builder-step active">
+                <h3>Основная информация</h3>
                 <div class="form-group">
-                    <label>Имя бота</label>
-                    <input type="text" id="botName" placeholder="Например: Helper Bot">
+                    <label for="botName">Имя бота</label>
+                    <input type="text" id="botName" placeholder="Например: Helper Bot" required>
                     <small>Имя вашего бота (будет отображаться в Telegram)</small>
                 </div>
                 <div class="form-group">
-                    <label>Описание бота</label>
-                    <textarea id="botDescription" placeholder="Опишите, что умеет ваш бот"></textarea>
+                    <label for="botDescription">Описание бота</label>
+                    <textarea id="botDescription" placeholder="Опишите, что умеет ваш бот" required></textarea>
                     <small>Краткое описание функционала бота</small>
                 </div>
             </div>
 
-            <!-- Шаг 2: Команды -->
-            <div class="builder-step" id="step2">
-                <div class="commands-list" id="commandsList">
-                    <!-- Команды будут добавляться здесь -->
+            <!-- Шаг 2: Приветственное сообщение -->
+            <div id="step2" class="builder-step">
+                <h3>Приветственное сообщение</h3>
+                <div class="form-group">
+                    <label for="welcomeMessage">Сообщение при старте</label>
+                    <textarea id="welcomeMessage" placeholder="Привет! Я бот, который поможет тебе..." required></textarea>
+                    <small>Это сообщение пользователь получит при первом запуске бота</small>
                 </div>
-                <button class="add-button" id="addCommand">
+                <div class="form-group">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="showWelcomeKeyboard">
+                        <span>Показывать клавиатуру с приветствием</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Шаг 3: Команды -->
+            <div id="step3" class="builder-step">
+                <h3>Команды бота</h3>
+                <div id="commandsList" class="commands-list">
+                    <!-- Команды будут добавляться сюда -->
+                </div>
+                <button id="addCommand" class="add-button">
                     <i class="fas fa-plus"></i> Добавить команду
                 </button>
             </div>
 
-            <!-- Шаг 3: Сообщения -->
-            <div class="builder-step" id="step3">
-                <div class="messages-list" id="messagesList">
-                    <!-- Сообщения будут добавляться здесь -->
+            <!-- Шаг 4: Сообщения -->
+            <div id="step4" class="builder-step">
+                <h3>Ответы на сообщения</h3>
+                <div id="messagesList" class="messages-list">
+                    <!-- Сообщения будут добавляться сюда -->
                 </div>
-                <button class="add-button" id="addMessage">
-                    <i class="fas fa-plus"></i> Добавить сообщение
+                <button id="addMessage" class="add-button">
+                    <i class="fas fa-plus"></i> Добавить ответ
                 </button>
             </div>
 
-            <!-- Шаг 4: Кнопки -->
-            <div class="builder-step" id="step4">
-                <div class="buttons-list" id="buttonsList">
-                    <!-- Кнопки будут добавляться здесь -->
+            <!-- Шаг 5: Клавиатура -->
+            <div id="step5" class="builder-step">
+                <h3>Клавиатура бота</h3>
+                <div class="form-group">
+                    <label>Тип клавиатуры</label>
+                    <div class="keyboard-type-selector">
+                        <button class="keyboard-type active" data-type="standard">
+                            <i class="fas fa-keyboard"></i>
+                            <span>Стандартная</span>
+                        </button>
+                        <button class="keyboard-type" data-type="inline">
+                            <i class="fas fa-grip-horizontal"></i>
+                            <span>Inline</span>
+                        </button>
+                    </div>
                 </div>
-                <button class="add-button" id="addButton">
+                <div id="keyboardButtons" class="keyboard-buttons">
+                    <!-- Кнопки будут добавляться сюда -->
+                </div>
+                <button id="addKeyboardButton" class="add-button">
                     <i class="fas fa-plus"></i> Добавить кнопку
                 </button>
             </div>
         </div>
 
         <div class="builder-actions">
-            <button class="btn btn-back" id="prevStep">
+            <button id="prevStep" class="btn btn-back">
                 <i class="fas fa-arrow-left"></i> Назад
             </button>
-            <button class="btn btn-next" id="nextStep">
+            <button id="nextStep" class="btn btn-next">
                 Далее <i class="fas fa-arrow-right"></i>
             </button>
         </div>
