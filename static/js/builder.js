@@ -629,6 +629,9 @@ class BotBuilder {
         
         if (newStep < 1 || newStep > this.totalSteps) return;
         
+        // Сохраняем данные текущего шага
+        this.saveCurrentStepData();
+        
         if (direction > 0 && !this.validateStep(this.currentStep)) {
             this.showNotification('Пожалуйста, заполните все обязательные поля', 'error');
             return;
@@ -690,6 +693,20 @@ class BotBuilder {
         setTimeout(() => {
             window.location.href = 'my-bots.html';
         }, 2000);
+    }
+
+    // Добавим метод сохранения данных
+    saveCurrentStepData() {
+        switch(this.currentStep) {
+            case 1:
+                this.botData.name = document.getElementById('botName').value;
+                this.botData.description = document.getElementById('botDescription').value;
+                break;
+            case 2:
+                this.botData.welcomeMessage = document.getElementById('welcomeMessage').value;
+                break;
+            // Остальные шаги сохраняются через диалоги
+        }
     }
 }
 

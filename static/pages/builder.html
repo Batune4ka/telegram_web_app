@@ -25,29 +25,7 @@
     </nav>
 
     <div class="builder-container">
-        <div class="progress-bar">
-            <div class="progress-step active" data-step="1">
-                <div class="step-number">1</div>
-                <div class="step-label">Основное</div>
-            </div>
-            <div class="progress-step" data-step="2">
-                <div class="step-number">2</div>
-                <div class="step-label">Приветствие</div>
-            </div>
-            <div class="progress-step" data-step="3">
-                <div class="step-number">3</div>
-                <div class="step-label">Команды</div>
-            </div>
-            <div class="progress-step" data-step="4">
-                <div class="step-number">4</div>
-                <div class="step-label">Сообщения</div>
-            </div>
-            <div class="progress-step" data-step="5">
-                <div class="step-number">5</div>
-                <div class="step-label">Клавиатура</div>
-            </div>
-        </div>
-
+        <!-- Контент шагов -->
         <div class="builder-content">
             <!-- Шаг 1: Основная информация -->
             <div id="step1" class="builder-step active">
@@ -72,19 +50,13 @@
                     <textarea id="welcomeMessage" placeholder="Привет! Я бот, который поможет тебе..." required></textarea>
                     <small>Это сообщение пользователь получит при первом запуске бота</small>
                 </div>
-                <div class="form-group">
-                    <label class="checkbox-container">
-                        <input type="checkbox" id="showWelcomeKeyboard">
-                        <span>Показывать клавиатуру с приветствием</span>
-                    </label>
-                </div>
             </div>
 
             <!-- Шаг 3: Команды -->
             <div id="step3" class="builder-step">
                 <h3>Команды бота</h3>
                 <div id="commandsList" class="commands-list">
-                    <!-- Команды будут добавляться сюда -->
+                    <!-- Команды будут добавляться здесь -->
                 </div>
                 <button id="addCommand" class="add-button">
                     <i class="fas fa-plus"></i> Добавить команду
@@ -95,7 +67,7 @@
             <div id="step4" class="builder-step">
                 <h3>Ответы на сообщения</h3>
                 <div id="messagesList" class="messages-list">
-                    <!-- Сообщения будут добавляться сюда -->
+                    <!-- Сообщения будут добавляться здесь -->
                 </div>
                 <button id="addMessage" class="add-button">
                     <i class="fas fa-plus"></i> Добавить ответ
@@ -105,28 +77,40 @@
             <!-- Шаг 5: Клавиатура -->
             <div id="step5" class="builder-step">
                 <h3>Клавиатура бота</h3>
-                <div class="form-group">
-                    <label>Тип клавиатуры</label>
-                    <div class="keyboard-type-selector">
-                        <button class="keyboard-type active" data-type="standard">
-                            <i class="fas fa-keyboard"></i>
-                            <span>Стандартная</span>
-                        </button>
-                        <button class="keyboard-type" data-type="inline">
-                            <i class="fas fa-grip-horizontal"></i>
-                            <span>Inline</span>
-                        </button>
-                    </div>
-                </div>
                 <div id="keyboardButtons" class="keyboard-buttons">
-                    <!-- Кнопки будут добавляться сюда -->
+                    <!-- Кнопки будут добавляться здесь -->
                 </div>
-                <button id="addKeyboardButton" class="add-button">
+                <button id="addButton" class="add-button">
                     <i class="fas fa-plus"></i> Добавить кнопку
                 </button>
             </div>
         </div>
 
+        <!-- Прогресс-бар перемещен вниз -->
+        <div class="progress-bar">
+            <div class="progress-step active" data-step="1">
+                <div class="step-number">1</div>
+                <div class="step-label">Основное</div>
+            </div>
+            <div class="progress-step" data-step="2">
+                <div class="step-number">2</div>
+                <div class="step-label">Приветствие</div>
+            </div>
+            <div class="progress-step" data-step="3">
+                <div class="step-number">3</div>
+                <div class="step-label">Команды</div>
+            </div>
+            <div class="progress-step" data-step="4">
+                <div class="step-number">4</div>
+                <div class="step-label">Сообщения</div>
+            </div>
+            <div class="progress-step" data-step="5">
+                <div class="step-number">5</div>
+                <div class="step-label">Клавиатура</div>
+            </div>
+        </div>
+
+        <!-- Кнопки навигации -->
         <div class="builder-actions">
             <button id="prevStep" class="btn btn-back">
                 <i class="fas fa-arrow-left"></i> Назад
